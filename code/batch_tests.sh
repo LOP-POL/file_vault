@@ -24,7 +24,7 @@ set -uo pipefail
 source ~/.bashrc 2>/dev/null || true
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LOG_FILE="$SCRIPT_DIR/batch_run_$(date +%Y%m%d_%H%M%S).log"
+LOG_FILE="$SCRIPT_DIR/batch_run_$(date +%Y_%m_%d_%H%:M%:S).log"
 
 # --- Sanity-check required variables ---------------------------------------
 : "${data_dir:?data_dir is not set. Export it before running this script.}"
