@@ -44,6 +44,7 @@ Crack.TensionCompression.Split=1
 Crack.TensionCompressionSplit.Store.Compression=1
 Crack.TotalChange.Threshold=mobility*0.01
 Crack.Type=obstacle
+Crack.CrackResistance=(2e2, 1e2)
 Crack.use_energetic=0
 Crack=0
 Energy.Type=disabled
