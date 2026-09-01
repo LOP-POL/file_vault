@@ -55,9 +55,15 @@ mkdir -p "$OUTDIR"
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLOT_SCRIPT="$SCRIPT_DIR/plot_stress.py"
+PLOT_VTK_SCRIPT="$SCRIPT_DIR/plot_vtk_stress.py"
 
 if [[ ! -f "$PLOT_SCRIPT" ]]; then
     echo "Error: plot_stress.py not found at $PLOT_SCRIPT"
+    exit 1
+fi
+
+if [[ ! -f "$PLOT_VTK_SCRIPT" ]]; then
+    echo "Error: plot_vtk_stress.py not found at $PLOT_VTK_SCRIPT"
     exit 1
 fi
 
@@ -69,8 +75,8 @@ echo ""
 # Define stress components to process
 STRESS_COMPONENTS=("11" "22" "21")
 DOMAIN_OFFSET_X=0
-DOMAIN_OFFSET_Y=-50
-DOMAIN_END_X=0
+DOMAIN_OFFSET_Y=0
+DOMAIN_END_X=50
 DOMAIN_END_Y=50
 
 # Counter for processed folders
@@ -131,36 +137,72 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
             continue
         fi
         
+        # Also create domain cut for the geometry file
+        SIMGEO_DOM_CUT_FILE="$WORK_DIR/${FOLDER_NAME}_stress${COMPONENT}_cut.p3simgeo"
+    
         # Create VTK file
         VTK_BASE="$WORK_DIR/stress${COMPONENT}_vtk"
         echo "    Converting to VTK format for stress${COMPONENT}..."
-        if data2vtk "$SIMGEO_FILE" "$VTK_BASE" \
+        SIMGEO_DOM_CUT_FILE="$WORK_DIR/${FOLDER_NAME}_stress${COMPONENT}_cut.p3simgeo"
+        if data2vtk "$SIMGEO_DOM_CUT_FILE"\
             -d "$DOMAIN_CUT_FILE" \
-            -a 2>/dev/null; then
+            "$VTK_BASE" 2>/dev/null       
+            ;
+            then
             echo "      VTK files created: ${VTK_BASE}*.vtk"
         else
             echo "      WARNING: data2vtk failed for stress${COMPONENT}"
             continue
         fi
         
-        # Generate plot using plot_stress.py
-        echo "    Generating plot for stress${COMPONENT}..."
-        VTK_FILE="${VTK_BASE}-000.vtk"
-        if [[ -f "$VTK_FILE" ]]; then
-            if python3 "$PLOT_SCRIPT" \
-                --infile "$VTK_FILE" \
-                --chi "$CHI" \
-                --angle "$ANGLE" \
-                --component "$COMPONENT" \
-                --outdir "$OUTDIR" 2>/dev/null; then
-                echo "      Plot generated successfully"
-            else
-                echo "      WARNING: plot generation failed for stress${COMPONENT}"
-            fi
+        # Generate plots using both plot_stress.py and plot_vtk_stress.py
+        echo "    Generating plots for stress${COMPONENT}..."
+        
+        # Find all VTK files for this component and use the last frame
+        VTK_FILES=(${VTK_BASE}-*.vtk)
+        if [[ ${#VTK_FILES[@]} -eq 0 ]]; then
+            echo "      WARNING: No VTK files found matching pattern: ${VTK_BASE}-*.vtk"
+            continue
+        fi
+        
+        # Get the last VTK file (highest frame number)
+        VTK_FILE="${VTK_FILES[-1]}"
+        NUM_FRAMES=${#VTK_FILES[@]}
+        echo "      Found $NUM_FRAMES frames, using last frame: $(basename "$VTK_FILE")"
+        
+        # 1. Generate 1D line plot using plot_stress.py
+        echo "      Generating 1D stress profile plot..."
+        if python3 "$PLOT_SCRIPT" \
+            --infile "$VTK_FILE" \
+            --chi "$CHI" \
+            --angle "$ANGLE" \
+            --component "$COMPONENT" \
+            --outdir "$OUTDIR" 2>/dev/null; then
+            echo "        1D plot generated successfully"
         else
-            echo "      WARNING: VTK file not found: $VTK_FILE"
+            echo "        WARNING: 1D plot generation failed for stress${COMPONENT}"
         fi
     done
+    
+    # 2. Generate 2D field plots using plot_vtk_stress.py (all stress components at once)
+    # Find any VTK file from the first component to pass to the 2D plotting script
+    VTK_BASE_11="$WORK_DIR/stress11_vtk"
+    VTK_FILES_11=(${VTK_BASE_11}-*.vtk)
+    if [[ ${#VTK_FILES_11[@]} -gt 0 ]]; then
+        VTK_FILE_FOR_2D="${VTK_FILES_11[-1]}"
+        echo "    Generating 2D field plots for all stress components..."
+        if python3 "$PLOT_VTK_SCRIPT" \
+            --vtk "$VTK_FILE_FOR_2D" \
+            --chi "$CHI" \
+            --angle "$ANGLE" \
+            --outdir "$OUTDIR" 2>/dev/null; then
+            echo "      2D field plots generated successfully (stress11, stress22, stress12)"
+        else
+            echo "      WARNING: 2D field plot generation failed"
+        fi
+    else
+        echo "    WARNING: Could not find VTK files for 2D plotting"
+    fi
     
     echo "  Folder processing complete"
     echo ""

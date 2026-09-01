@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 
 try:
     import vtk
-    from vtkmodules.vtkIOLegacy import vtkGenericDataObjectReader, vtkStructuredPointsReader
+    from vtkmodules.vtkIOLegacy import vtkDataSetReader, vtkStructuredPointsReader
     from vtkmodules.util import numpy_support
 except ImportError:
     print("Error: the VTK Python bindings are required in this Python environment.",
@@ -69,7 +69,7 @@ def read_vtk_file(vtk_path):
         cell_data: dictionary mapping array names to NumPy arrays
         dataset: original VTK dataset
     """
-    reader = vtkGenericDataObjectReader()
+    reader = vtkStructuredPointsReader()
     reader.SetFileName(str(vtk_path))
     reader.Update()
 

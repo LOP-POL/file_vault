@@ -24,8 +24,8 @@
 set -uo pipefail
 
 # --- Domain-cut parameters (adjust as needed) --------------------------------
-XOFFSET=-50
-YOFFSET=-50
+XOFFSET=50
+YOFFSET=50
 # XEND / YEND are left at their tool defaults (-1 = keep everything up to the
 # domain max). Add -X "$XEND" / -Y "$YEND" to the domaincut calls below if you
 # need an upper bound too.
@@ -132,15 +132,15 @@ for folder in "${folders[@]}"; do
     stress11_cut_simgeo="${work_dir}/${prefix}_stress11_domaincut.p3simgeo"
 
     cut_ok=1
-    if ! domaincut -f -x "$XOFFSET" -y "$YOFFSET" "$stress11" "$stress11_cut" >> "$MASTER_LOG" 2>&1; then
+    if ! domaincut -f  "$stress11" "$stress11_cut" -X "$XOFFSET" -Y "$YOFFSET" >> "$MASTER_LOG" 2>&1; then
         log "WARNING: domaincut failed for stress11 in $folder_name"
         cut_ok=0
     fi
-    if ! domaincut -f -x "$XOFFSET" -y "$YOFFSET" "$stress22" "$stress22_cut" >> "$MASTER_LOG" 2>&1; then
+    if ! domaincut -f  "$stress22" "$stress22_cut" -X "$XOFFSET" -Y "$YOFFSET" >> "$MASTER_LOG" 2>&1; then
         log "WARNING: domaincut failed for stress22 in $folder_name"
         cut_ok=0
     fi
-    if ! domaincut -f -x "$XOFFSET" -y "$YOFFSET" "$stress12" "$stress12_cut" >> "$MASTER_LOG" 2>&1; then
+    if ! domaincut -f  "$stress12" "$stress12_cut" -X "$XOFFSET" -Y "$YOFFSET" >> "$MASTER_LOG" 2>&1; then
         log "WARNING: domaincut failed for stress12 in $folder_name"
         cut_ok=0
     fi

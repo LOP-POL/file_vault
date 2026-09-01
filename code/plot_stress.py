@@ -33,7 +33,7 @@ import matplotlib.pyplot as plt
 # Optional VTK support
 try:
     import vtk
-    from vtkmodules.vtkIOLegacy import vtkUnstructuredGridReader
+    from vtkmodules.vtkIOLegacy import vtkDataSetReader, vtkStructuredPointsReader
     from vtkmodules.util import numpy_support
     HAS_VTK = True
 except ImportError:
@@ -107,7 +107,7 @@ def read_vtk_scalar_data(vtk_file_path, component=None):
         return None
     
     try:
-        reader = vtkUnstructuredGridReader()
+        reader = vtkStructuredPointsReader()
         reader.SetFileName(str(vtk_file_path))
         reader.ReadAllVectorsOn()
         reader.ReadAllScalarsOn()
