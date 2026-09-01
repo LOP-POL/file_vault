@@ -90,6 +90,50 @@ def format_value(value):
     return str(value)
 
 
+def fix_vtk_scalars_header(vtk_file_path, component=None):
+    """
+    Fix malformed VTK SCALARS declaration by adding the scalar name.
+    
+    Some VTK generators (e.g., data2vtk) produce incomplete SCALARS lines:
+        SCALARS float 1
+    
+    This should be:
+        SCALARS stress<component> float 1
+    
+    This function reads the VTK file, fixes the header, and writes it back.
+    
+    Args:
+        vtk_file_path: Path to the VTK file
+        component: Component name to add (e.g., '11', '22', '21')
+    """
+    try:
+        with open(vtk_file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            lines = f.readlines()
+        
+        # Look for malformed SCALARS line
+        modified = False
+        for i, line in enumerate(lines):
+            # Match SCALARS declarations that are missing the name
+            if line.strip().startswith('SCALARS'):
+                parts = line.split()
+                # Malformed: SCALARS float 1 (only 3 parts, missing scalar name)
+                # Correct: SCALARS name float 1 (4 parts)
+                if len(parts) >= 2 and parts[1] in ['float', 'int', 'double', 'unsigned_char', 'unsigned_int']:
+                    scalar_name = f"stress{component}" if component else "stress"
+                    # Reconstruct: SCALARS <name> <type> <num_components>
+                    new_line = f"SCALARS {scalar_name} {' '.join(parts[1:])}\n"
+                    lines[i] = new_line
+                    modified = True
+                    print(f"Fixed SCALARS header: added name '{scalar_name}'", file=sys.stderr)
+        
+        if modified:
+            with open(vtk_file_path, 'w', encoding='utf-8') as f:
+                f.writelines(lines)
+    
+    except Exception as e:
+        print(f"Warning: Could not fix VTK header: {e}", file=sys.stderr)
+
+
 def read_vtk_scalar_data(vtk_file_path, component=None):
     """
     Read scalar data from a VTK file.
@@ -105,6 +149,9 @@ def read_vtk_scalar_data(vtk_file_path, component=None):
     if not HAS_VTK:
         print("Error: VTK support not available. Install python package: vtk", file=sys.stderr)
         return None
+    
+    # Fix any malformed SCALARS headers before reading
+    fix_vtk_scalars_header(vtk_file_path, component)
     
     try:
         reader = vtkStructuredPointsReader()
