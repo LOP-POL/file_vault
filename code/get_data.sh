@@ -146,6 +146,7 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
         SIMGEO_DOM_CUT_FILE="$WORK_DIR/${FOLDER_NAME}_stress${COMPONENT}_cut.p3simgeo"
         if data2vtk "$SIMGEO_DOM_CUT_FILE"\
             -d "$DOMAIN_CUT_FILE" \
+            -a \
             "$VTK_BASE" 2>/dev/null       
             ;
             then
