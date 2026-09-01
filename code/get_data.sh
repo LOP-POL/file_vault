@@ -143,7 +143,17 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
         # Create VTK file
         VTK_BASE="$WORK_DIR/stress${COMPONENT}_vtk"
         echo "    Converting to VTK format for stress${COMPONENT}..."
-        SIMGEO_DOM_CUT_FILE="$WORK_DIR/${FOLDER_NAME}_stress${COMPONENT}_cut.p3simgeo"
+        
+        # Error with folder names that had decimal places
+        if [[! -f "$WORK_DIR/${FOLDER_NAME}_stress${COMPONENT}_cut.p3simgeo"]]; then
+            for file in "$WORK_DIR"/*.p3simgeo; do
+            [[-f "$file"]] || continue
+
+            mv "$file" "$WORK_DIR/${FOLDER_NAME}_stress${COMPONENT}_cut.p3simgeo"
+            echo "Renamed the file"
+            done
+        fi
+
         if data2vtk "$SIMGEO_DOM_CUT_FILE"\
             -d "$DOMAIN_CUT_FILE" \
             -a \
