@@ -1,0 +1,69 @@
+
+DESCRIPTION:
+domaincut cuts a cube out of the simulation domain.
+Release Version 2.6.2 (29.02.2025)
+
+
+USAGE: domaincut [-bf] [-x|--xoffset [4mlong[0m] [-X|--xend [4mlong[0m] [-y|--yoffset [4mlong[0m] [-Y|--yend [4mlong[0m] [-z|--zoffset [4mlong[0m] [-Z|--zend [4mlong[0m] [-B|--blocksize [4mlong[0m] [-F|--frames [4mframe[0m] filein fileout
+
+
+OPTIONS:
+
+ <inputfile> (required)
+                The simulation file for cutting
+
+ <outputfile> (required)
+                The file with the cutted cube
+
+ -b --boundary
+                performes a normal boundary cut, cuts off 1 bundary cell on each side of the frame 'cube'
+                if possible
+
+ -x<i> --xoffset=<i> (default=0) 
+                removes all cells in x dimension outside of [x..X]. Default is to keep all. 0 <= x <= X
+                <= Xmax
+
+ -X<i> --xend=<i> (default=-1) 
+                removes all cells in x dimension outside of [x..X]. Default is to keep all. 0 <= x <= X
+                <= Xmax
+
+ -y<i> --yoffset=<i> (default=0) 
+                removes all cells in y dimension outside of [y..Y]. Default is to keep all. 0 <= y <= Y
+                <= Ymax
+
+ -Y<i> --yend=<i> (default=-1) 
+                removes all cells in y dimension outside of [y..Y]. Default is to keep all. 0 <= y <= Y
+                <= Ymax
+
+ -z<i> --zoffset=<i> (default=0) 
+                removes all cells in z dimension outside of [z..Z]. Default is to keep all. 0 <= z <= Z
+                <= Zmax
+
+ -Z<i> --zend=<i> (default=-1) 
+                removes all cells in z dimension outside of [z..Z]. Default is to keep all. 0 <= z <= Z
+                <= Zmax
+
+ -B<i> --blocksize=<i> (default=6) 
+                Set blocksize of the generated blockdata-file
+
+ -F<i>,<i>-<i>,<i>-<i>%<i> --frames=<i>,<i>-<i>,<i>-<i>%<i>
+                Working frames
+
+ -f --force
+                force replacement of existing files
+
+ -v<i> --verbose=<i>
+                enable the output (stderr) of some (helpful) log messages with log-level <i>, a higher
+                level <i> will create more messages.
+
+ -h --help
+                print this help (--helpall prints an extended help)
+
+EXAMPLE:
+e.g.: domaincut input.phi_alpha.p3s output.phi_alpha.p3s -b
+This will cut off the boundary cells and writes the new scalardata to output.phi_alpha.p3s.
+e.g.: domaincut input.fluiddynamics_velocity.p3v output.fluiddynamics_velocity.p3v -x 10 -X 50 -z
+12
+This will cut off all outside the cube[x,y,z](10,0,12) : [X,Y,Z](50,99,99) with a cube containing
+100 cells in every dimension.
+
