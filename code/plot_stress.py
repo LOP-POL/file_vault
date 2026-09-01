@@ -193,18 +193,26 @@ def read_vtk_scalar_data(vtk_file_path, component=None):
         # Convert to numpy array
         stress_data = numpy_support.vtk_to_numpy(stress_array)
         
-        # Extract point coordinates
-        points = output.GetPoints()
-        coords = numpy_support.vtk_to_numpy(points.GetData())
+        # Compute coordinates based on grid structure
+        # vtkStructuredPoints uses origin, spacing, and dimensions
+        dims = output.GetDimensions()
+        spacing = output.GetSpacing()
+        origin = output.GetOrigin()
         
-        # Use first spatial dimension (X) as x-axis
-        x_values = coords[:, 0] if coords.shape[1] > 0 else np.arange(len(stress_data))
+        # Generate X coordinates based on grid spacing
+        # dims are (nx, ny, nz), spacing is (dx, dy, dz)
+        nx = dims[0]
+        dx = spacing[0]
+        x0 = origin[0]
+        x_values = np.array([x0 + i * dx for i in range(nx)])
+        
         stress_values = stress_data if stress_data.ndim == 1 else stress_data[:, 0]
         
-        # Sort by x coordinate
-        sort_idx = np.argsort(x_values)
-        x_values = x_values[sort_idx]
-        stress_values = stress_values[sort_idx]
+        # Ensure arrays have matching lengths
+        if len(x_values) != len(stress_values):
+            print(f"Warning: X coordinates ({len(x_values)}) don't match stress data ({len(stress_values)}). "
+                  f"Using indices as X-axis.", file=sys.stderr)
+            x_values = np.arange(len(stress_values))
         
         return x_values, stress_values
         
