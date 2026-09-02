@@ -88,7 +88,8 @@ def main():
     generated = []
     for chi in CHI_VALUES:
         for angle in ANGLE_VALUES:
-            text = CHI_LINE_RE.sub(rf'\g<1>{format_number(chi)}', template_text)
+            # Chi has to be in giga so I multiply it by 10³ 
+            text = CHI_LINE_RE.sub(rf'\g<1>{format_number((chi*10**3))}', template_text)
             text = ANGLE_LINE_RE.sub(rf'\g<1>{format_number(angle)}', text)
 
             filename = (
