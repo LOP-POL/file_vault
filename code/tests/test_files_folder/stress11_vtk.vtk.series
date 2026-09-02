@@ -1,0 +1,8 @@
+{
+  "file-series-version" : "1.0",
+  "files" : [
+    { "name" : "stress11_vtk-00001.vtk", "time" : 0.000000 },
+    { "name" : "stress11_vtk-00002.vtk", "time" : 0.000000 },
+    { "name" : "stress11_vtk-00003.vtk", "time" : 500.000000 }
+  ]
+}

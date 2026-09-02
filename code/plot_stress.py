@@ -82,7 +82,6 @@ def parse_filename_metadata(filename):
 
     return component, frame, x_range
 
-
 def format_value(value):
     """Format a chi/angle value without a trailing '.0' for whole numbers."""
     if float(value).is_integer():
@@ -192,7 +191,9 @@ def read_vtk_scalar_data(vtk_file_path, component=None):
         
         # Convert to numpy array
         stress_data = numpy_support.vtk_to_numpy(stress_array)
-        
+        print("stress data to be plotted")
+        print(stress_data)
+        print(f"length is stress data {len(stress_data)}")
         # Compute coordinates based on grid structure
         # vtkStructuredPoints uses origin, spacing, and dimensions
         dims = output.GetDimensions()
@@ -205,7 +206,8 @@ def read_vtk_scalar_data(vtk_file_path, component=None):
         dx = spacing[0]
         x0 = origin[0]
         x_values = np.array([x0 + i * dx for i in range(nx)])
-        
+        print(" \n x values")
+        print(x_values)
         stress_values = stress_data if stress_data.ndim == 1 else stress_data[:, 0]
         
         # Ensure arrays have matching lengths
@@ -219,6 +221,53 @@ def read_vtk_scalar_data(vtk_file_path, component=None):
     except Exception as e:
         print(f"Error reading VTK file: {e}", file=sys.stderr)
         return None
+
+def manual_extraction(vtk_file_path, component):
+
+    """
+    Read scalar data from a VTK file.
+    
+    Args:
+        vtk_file_path: Path to the VTK file
+        component: Optional component name to filter (e.g., 'stress11')
+    
+    Returns:
+        Tuple of (x_values, stress_values) as numpy arrays
+        or None if data cannot be extracted
+    """
+    if not HAS_VTK:
+        print("Error: VTK support not available. Install python package: vtk", file=sys.stderr)
+        return None
+    
+    # Fix any malformed SCALARS headers before reading
+    fix_vtk_scalars_header(vtk_file_path, component)
+    
+    try:
+        reader = vtkStructuredPointsReader()
+        reader.SetFileName(str(vtk_file_path))
+        reader.ReadAllVectorsOn()
+        reader.ReadAllScalarsOn()
+        reader.Update()
+        
+        output = reader.GetOutput()
+
+        if output.GetNumberOfCells() == 0 and output.GetNumberOfPoints() == 0:
+            print(f"Error: VTK file is empty: {vtk_file_path}", file=sys.stderr)
+            return None
+
+        stress = numpy_support.vtk_to_numpy(
+            output.GetPointData().GetScalars()
+        )
+        nx, ny, nz = output.GetDimensions()
+        stress =  stress.reshape((ny,nx))
+       
+        return nx, ny , stress
+        
+    except Exception as e:
+        print(f"Error reading VTK file: {e}", file=sys.stderr)
+        return None
+
+    
 
 
 def read_dat_data(dat_file_path):
@@ -244,6 +293,53 @@ def read_dat_data(dat_file_path):
         print(f"Error reading .dat file: {e}", file=sys.stderr)
         return None
 
+def visulize_whole_field(outdir,infile_parent,angle_str,chi_str,stress, component):
+    plt.figure()
+    plt.imshow(stress, origin='lower')
+    plt.colorbar(label='Stress')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.show()
+
+    outdir = Path(outdir) if outdir else infile_parent
+    outdir.mkdir(parents=True, exist_ok=True)
+    
+    comp_tag = f"stress{component}" if component else "stress"
+    out_name = f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_field.png"
+    out_path = outdir / out_name
+    plt.savefig(str(out_path), dpi=150)
+    print(f"Saved plot to: {out_path}")
+
+def plot_stress_vs_x_fixed_y(x,stress,y_index,infile_parent,component,chi_str,angle_str, outdir):
+    plt.figure()
+    plt.plot(x,stress[y_index, :])
+    plt.xlabel('x')
+    plt.ylabel('stress')
+    plt.title(f"stress along y={y_index}")
+    outdir = Path(outdir) if outdir else infile_parent
+    outdir.mkdir(parents=True, exist_ok=True)
+    
+    comp_tag = f"stress{component}" if component else "stress"
+    out_name = f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_x_fixed_y{y_index}.png"
+    out_path = outdir / out_name
+    plt.savefig(str(out_path), dpi=150)
+    print(f"Saved plot to: {out_path}")
+
+def plot_stress_vs_y_fixed_x(y,stress,x_index,infile_parent,component,chi_str,angle_str, outdir):
+    plt.figure()
+    plt.plot(y,stress[: ,x_index])
+    plt.xlabel('x')
+    plt.ylabel('stress')
+    plt.title(f"stress along y={x_index}")
+    outdir = Path(outdir) if outdir else infile_parent
+    outdir.mkdir(parents=True, exist_ok=True)
+    
+    comp_tag = f"stress{component}" if component else "stress"
+    out_name = f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_y_fixed_x{x_index}.png"
+    out_path = outdir / out_name
+    plt.savefig(str(out_path), dpi=150)
+    print(f"Saved plot to: {out_path}")
+
 
 def main():
     args = parse_args()
@@ -260,6 +356,12 @@ def main():
             sys.exit(1)
         x_values, value_col = result
         x_label = "Position, X"
+
+        nx, ny, stress_man = manual_extraction(infile, args.component) # type: ignore
+        y_values_man = np.arange(ny)
+        x_values_man = np.arange(nx)
+       
+
     else:
         # Assume .dat format
         result = read_dat_data(infile)
@@ -285,25 +387,12 @@ def main():
     chi_str = format_value(args.chi)
     angle_str = format_value(args.angle)
 
-    title = f"{stress_label} vs {x_label} — chi = {chi_str}, angle = {angle_str}°"
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(x_values, value_col, marker="o", markersize=3, linewidth=1.5, label=f"stress{component}")
-    ax.set_xlabel(x_label, fontsize=12)
-    ax.set_ylabel(stress_label, fontsize=12)
-    ax.set_title(title, fontsize=14, fontweight="bold")
-    ax.grid(True, alpha=0.3)
-    ax.legend()
-    fig.tight_layout()
-
     outdir = Path(args.outdir) if args.outdir else infile.parent
     outdir.mkdir(parents=True, exist_ok=True)
 
-    comp_tag = f"stress{component}" if component else "stress"
-    out_name = f"{comp_tag}_chi_{chi_str}_angle_{angle_str}.png"
-    out_path = outdir / out_name
-    fig.savefig(str(out_path), dpi=150)
-    print(f"Saved plot to: {out_path}")
+    visulize_whole_field(args.outdir, infile.parent,angle_str,chi_str,stress_man,component)
+    plot_stress_vs_x_fixed_y(x_values_man,stress_man,48,infile.parent,component,chi_str,angle_str, outdir)
+    plot_stress_vs_y_fixed_x(y_values_man,stress_man,48,infile.parent,component,chi_str,angle_str, outdir)
 
     if args.show:
         plt.show()
@@ -311,3 +400,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
