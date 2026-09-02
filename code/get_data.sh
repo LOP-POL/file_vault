@@ -194,29 +194,6 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
             echo "        WARNING: 1D plot generation failed for stress${COMPONENT}"
         fi
     done
-    
-    # 2. Generate 2D field plots using plot_vtk_stress.py (all stress components at once)
-    # Find any VTK file from the first component to pass to the 2D plotting script
-    VTK_BASE_11="$WORK_DIR/stress11_vtk"
-    VTK_FILES_11=(${VTK_BASE_11}-*.vtk)
-    if [[ ${#VTK_FILES_11[@]} -gt 0 ]]; then
-        VTK_FILE_FOR_2D="${VTK_FILES_11[-1]}"
-        echo "    Generating 2D field plots for all stress components..."
-        if python3 "$PLOT_VTK_SCRIPT" \
-            --vtk "$VTK_FILE_FOR_2D" \
-            --chi "$CHI" \
-            --angle "$ANGLE" \
-            --outdir "$OUTDIR" 2>/dev/null; then
-            echo "      2D field plots generated successfully (stress11, stress22, stress12)"
-        else
-            echo "      WARNING: 2D field plot generation failed"
-        fi
-    else
-        echo "    WARNING: Could not find VTK files for 2D plotting"
-    fi
-    
-    echo "  Folder processing complete"
-    echo ""
 done
 
 echo "==============================================="
