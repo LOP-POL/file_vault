@@ -178,7 +178,7 @@ Run log: $run_log"
 
     # This test's own log, separate from the master log, so it can be
     # emailed/attached on its own once the run finishes.
-    mpirun -np 4 "$pace2D_bin" -I "$infile" -P "$output_dir" -f > "$run_log" 2>&1
+    mpirun -np 2 "$pace2D_bin" -I "$infile" -P "$output_dir" -f > "$run_log" 2>&1
     exit_code=$?
 
     end_time="$(date '+%Y-%m-%d %H:%M:%S')"
