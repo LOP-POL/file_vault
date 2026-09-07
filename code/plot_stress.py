@@ -54,6 +54,11 @@ def parse_args():
                         help="Directory to save the plot in (default: same directory as --infile)")
     parser.add_argument("--show", action="store_true", 
                         help="Also display the plot interactively")
+    # New: allow plotting stress vs displacement from two boxaverage output files
+    parser.add_argument("--stressfile", default=None,
+                        help="Path to a stress boxaverage output (text) file to use for stress values")
+    parser.add_argument("--displacementfile", default=None,
+                        help="Path to a displacement boxaverage output (text) file; uses last column named 'absolute_averageaverage_of_cells' or the last numeric column")
     return parser.parse_args()
 
 
@@ -293,6 +298,60 @@ def read_dat_data(dat_file_path):
         print(f"Error reading .dat file: {e}", file=sys.stderr)
         return None
 
+
+def read_last_column(txt_file_path):
+    """
+    Read a whitespace-delimited text file (boxaverage output) and return the last numeric column
+    as a 1D numpy array. Lines starting with '#' are skipped.
+    """
+    try:
+        data = np.loadtxt(txt_file_path, comments='#')
+        if data.ndim == 1:
+            data = data.reshape(1, -1)
+        return data[:, -1]
+    except Exception as e:
+        print(f"Error reading last column from {txt_file_path}: {e}", file=sys.stderr)
+        return None
+
+
+def plot_stress_vs_displacement_files(stress_path, disp_path, outdir, chi, angle, component=None):
+    """
+    Read stress and displacement values from two boxaverage text files and plot stress vs displacement.
+    Saves a PNG in `outdir` named with chi, angle and component when available.
+    """
+    stress_vals = read_last_column(stress_path)
+    disp_vals = read_last_column(disp_path)
+    if stress_vals is None or disp_vals is None:
+        print("Error: could not read input files for stress-displacement plotting", file=sys.stderr)
+        return False
+
+    n = min(len(stress_vals), len(disp_vals))
+    stress_vals = stress_vals[:n]
+    disp_vals = disp_vals[:n]
+
+    chi_str = format_value(chi)
+    angle_str = format_value(angle)
+
+    outdir = Path(outdir) if outdir else Path(stress_path).parent
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    comp_tag = f"stress{component}" if component else "stress"
+    out_name = f"{comp_tag}_vs_disp_chi_{chi_str}_angle_{angle_str}.png"
+    out_path = outdir / out_name
+
+    plt.figure()
+    plt.plot(disp_vals, stress_vals, marker='o', linestyle='-')
+    plt.xlabel('Displacement (boxaverage last column)')
+    plt.ylabel('Stress')
+    title_comp = f" {comp_tag}" if component else ""
+    plt.title(f"Stress vs Displacement{title_comp} — chi={chi_str}, angle={angle_str}")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(str(out_path), dpi=150)
+    plt.close()
+    print(f"Saved stress vs displacement plot: {out_path}")
+    return True
+
 def visulize_whole_field(outdir,infile_parent,angle_str,chi_str,stress, component):
     plt.figure()
     plt.imshow(stress, origin='lower')
@@ -343,6 +402,15 @@ def plot_stress_vs_y_fixed_x(y,stress,x_index,infile_parent,component,chi_str,an
 
 def main():
     args = parse_args()
+
+    # If the user provided stressfile + displacementfile, produce a stress-vs-displacement plot
+    if args.stressfile and args.displacementfile:
+        ok = plot_stress_vs_displacement_files(args.stressfile, args.displacementfile, args.outdir, args.chi, args.angle, args.component)
+        if not ok:
+            sys.exit(1)
+        if args.show:
+            plt.show()
+        sys.exit(0)
 
     infile = Path(args.infile)
     if not infile.is_file():

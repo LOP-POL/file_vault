@@ -56,6 +56,7 @@ mkdir -p "$OUTDIR"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLOT_SCRIPT="$SCRIPT_DIR/plot_stress.py"
 PLOT_VTK_SCRIPT="$SCRIPT_DIR/plot_vtk_stress.py"
+PLOT_DISP_SCRIPT="$SCRIPT_DIR/plot_stress_vs_displacement.py"
 
 if [[ ! -f "$PLOT_SCRIPT" ]]; then
     echo "Error: plot_stress.py not found at $PLOT_SCRIPT"
@@ -64,6 +65,11 @@ fi
 
 if [[ ! -f "$PLOT_VTK_SCRIPT" ]]; then
     echo "Error: plot_vtk_stress.py not found at $PLOT_VTK_SCRIPT"
+    exit 1
+fi
+
+if [[ ! -f "$PLOT_DISP_SCRIPT" ]]; then
+    echo "Error: plot_stress_vs_displacement.py not found at $PLOT_DISP_SCRIPT"
     exit 1
 fi
 
@@ -108,6 +114,28 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
     
     echo "  Creating domain cuts and VTK files..."
     
+    # Create domain cut + boxaverage for displacement (Uy)
+    DISP_SRC="$folder/${FOLDER_NAME}.SolidMechanics_Uy.p3s"
+    DISP_CUT="$WORK_DIR/${FOLDER_NAME}_Uy_cut.p3s"
+    DISP_BOXAVG="$WORK_DIR/${FOLDER_NAME}_Uy_boxavg.txt"
+
+    if [[ -f "$DISP_SRC" ]]; then
+        echo "  Creating domain cut for displacement (Uy)..."
+        if domaincut "$DISP_SRC" "$DISP_CUT" -x "$DOMAIN_OFFSET_X" -X "$DOMAIN_END_X" -y "$DOMAIN_OFFSET_Y" -Y "$DOMAIN_END_Y" -f 2>/dev/null; then
+            echo "    Displacement domain cut created: $DISP_CUT"
+            echo "  Running boxaveragecells for displacement..."
+            if boxaveragecells "$DISP_CUT" -b "[${DOMAIN_OFFSET_X},${DOMAIN_OFFSET_Y},0],[${DOMAIN_END_X},${DOMAIN_END_Y},0]" > "$DISP_BOXAVG" 2>/dev/null; then
+                echo "    Displacement boxaverage saved: $DISP_BOXAVG"
+            else
+                echo "    WARNING: boxaveragecells failed for displacement"
+            fi
+        else
+            echo "    WARNING: domaincut failed for displacement"
+        fi
+    else
+        echo "    WARNING: Displacement source file not found: $DISP_SRC"
+    fi
+    
     # Process each stress component
     for COMPONENT in "${STRESS_COMPONENTS[@]}"; do
         STRESS_FILE="$folder/${FOLDER_NAME}.SolidMechanics_stress${COMPONENT}.p3s"
@@ -135,6 +163,15 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
         else
             echo "      WARNING: domaincut failed for stress${COMPONENT}"
             continue
+        fi
+
+        # Run boxaverage on the stress domain-cut file to produce a txt summary
+        STRESS_BOXAVG="$WORK_DIR/${FOLDER_NAME}_stress${COMPONENT}_boxavg.txt"
+        echo "    Running boxaveragecells for stress${COMPONENT}..."
+        if boxaveragecells "$DOMAIN_CUT_FILE" -b "[${DOMAIN_OFFSET_X},${DOMAIN_OFFSET_Y},0],[${DOMAIN_END_X},${DOMAIN_END_Y},0]" > "$STRESS_BOXAVG" 2>/dev/null; then
+            echo "      Stress boxaverage saved: $STRESS_BOXAVG"
+        else
+            echo "      WARNING: boxaveragecells failed for stress${COMPONENT}"
         fi
         
         # Also create domain cut for the geometry file
@@ -185,6 +222,8 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
         echo "      Generating 1D stress profile plot..."
         if python3 "$PLOT_SCRIPT" \
             --infile "$VTK_FILE" \
+            --stressfile "$STRESS_BOXAVG" \
+            --displacementfile "$DISP_BOXAVG" \
             --chi "$CHI" \
             --angle "$ANGLE" \
             --component "$COMPONENT" \
@@ -192,6 +231,18 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
             echo "        1D plot generated successfully"
         else
             echo "        WARNING: 1D plot generation failed for stress${COMPONENT}"
+        fi
+
+        # 2. Generate stress vs displacement plot using the boxaverage txt files (if available)
+        if [[ -f "$STRESS_BOXAVG" && -f "$DISP_BOXAVG" ]]; then
+            echo "      Generating stress vs displacement plot..."
+            if python3 "$PLOT_DISP_SCRIPT" --stressfile "$STRESS_BOXAVG" --displacementfile "$DISP_BOXAVG" --chi "$CHI" --angle "$ANGLE" --component "$COMPONENT" --outdir "$OUTDIR" 2>/dev/null; then
+                echo "        Stress vs displacement plot generated successfully"
+            else
+                echo "        WARNING: stress-vs-displacement plotting failed for stress${COMPONENT}"
+            fi
+        else
+            echo "      WARNING: Missing boxaverage files for stress-vs-displacement plotting"
         fi
     done
 done
