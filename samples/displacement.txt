@@ -1,0 +1,4 @@
+#     frame           time         sum_of_absolute_values   absolute_averageaverage_of_cells
+      1          0.000000e+00    0.000000e+00    0.000000e+00    0.000000e+00   
+      2          0.000000e+00    0.000000e+00    0.000000e+00    0.000000e+00   
+      3          2.000000e+02    4.231637e+01    4.231637e-01    4.231637e-01   

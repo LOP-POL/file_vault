@@ -8,7 +8,6 @@ I will  place the bash script in side  of the directory that has the output fold
 This bash file  will go through each folder extract the chi and angle values , create the domain cuts then the vtk files from teh domain cuts.
 Run the python script to generate the three plots for stress11 stress22 and stress 21 in x y and z , name the plot with the chi value, angle and dimension , I will aslo provide the output for the plot that will be created for each folder . then move on to the next folder.
 
-
 # Section 2:
 
 ## The structure of the folder
@@ -105,11 +104,9 @@ output_stress11_domaincut.p3s
 output_stress11_domaincut.p3simgeo
 ```
 
-
 # Section 4
 
 ## data2vtk
-
 
 ```Shell
 
@@ -172,4 +169,77 @@ outvtk-00001.vtk
 outvtk-00002.vtk
 outvtk-00003.vtk
 outvtk.vtk.series
+```
+
+## # Section 5
+
+## boaxaverage cells
+
+Example command
+
+```Shell
+boxaveragecells transversely_iso_crack_comp_chi_16_angle_90_04-Sep-2026_17\:39.SolidMechanics_Uy.p3s -b [1,100,0],[100,100,0] > /mnt/data/stud-uyslf/code/file_vault/file_vault/samples/displacement.txt
+```
+
+```Shell
+DESCRIPTION:
+Calculates the average value of all cells inside the given boundingbox or the whole simulation
+area. If the input is vectordata, the average value is calculated for all components (x, y and z)
+or only for chosen components. It is also possible to calculate the average norm.
+Release Version 2.6.2 (29.02.2025)
+
+
+USAGE: boxaveragecells [-oIixyz] [-b|--boundingbox bbox3D] [-F|--frames frame] [-P|--plotter plot] filein
+
+
+OPTIONS:
+
+ <inputfile> (required)
+                The scalardata or vectordata file of the simulation to process.
+
+ -b[<i>,<i>,<i>],[<i>,<i>,<i>] --boundingbox=[<i>,<i>,<i>],[<i>,<i>,<i>] (default=[-1,-1,-1],[-1,-1,-1]) 
+                Set boundingbox [left,bottom,back],[right,top,front].Includes the following intervals in
+                x-, y- and z-direction: [left, right), [bottom, top), [back, front)
+
+ -o --boundary-off
+                Do not process boundary. Does only work if no boundingbox is given.
+
+ -I --usebarrier
+                Do not reduce volume of the boundingbox by occuring barrier cells
+
+ -i --invert
+                result will be inverted if this flag is set. this is useful if the sumconstraint is valid
+                for the processed file (result = 1 - result)
+
+ -x --along_x
+                average value of every 2D slice inside boundarybox along x axis
+
+ -y --along_y
+                average value of every 2D slice inside boundarybox along y axis
+
+ -z --along_z
+                average value of every 2D slice inside boundarybox along z axis
+
+ -F<i>,<i>-<i>,<i>-<i>%<i> --frames=<i>,<i>-<i>,<i>-<i>%<i>
+                working frames
+
+ -P<s> --plotter=<s> (default=filename=pace3D_graphic_2026-09-04_18:12:46;tfsize=24;lt=linespoints;lfsize=14) 
+                Generate plot of the table
+
+ -v<i> --verbose=<i>
+                enable the output (stderr) of some (helpful) log messages with log-level <i>, a higher
+                level <i> will create more messages.
+
+ -h --help
+                print this help (--helpall prints an extended help)
+
+EXAMPLE:
+e.g.: boxaveragecells input.phi_alpha.p3s -b [1,0,0],[15,200,1]
+Calculate the average value inside the cells of phase alpha within the boundingbox: [1,0,0] and
+[15,200,1]
+e.g.: boxaveragecells input.vectype.p3v -o
+Calculate the average norm of the vectors in the whole simulation area (boundary excluded).
+e.g.: boxaveragecells input.vectype.p3v -y -P"terminal=display"
+Print the average values of xz-plane along y-axis and show a gnuplot diagram of the data.
+
 ```
