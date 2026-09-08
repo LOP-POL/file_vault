@@ -77,12 +77,40 @@ def plot_mode_angle(parent_dir, angle, outdir):
     plt.grid(True)
     outdir = Path(outdir) if outdir else Path(parent_dir)
     outdir.mkdir(parents=True, exist_ok=True)
-    fname = outdir / f"stress_vs_disp_angle_{angle}.png"
+    fname = outdir / f"stress22_vs_disp_angle_{angle}.png"
+    plt.tight_layout()
+    plt.savefig(str(fname), dpi=150)
+    print(f"Saved: {fname}")
+   
+
+
+    plt.figure()
+    for chi, folder in selected:
+        work = folder / 'domain_cut_analysis'
+        stress_file = work / f"{folder.name}_stress11_boxavg.txt"
+        disp_file = work / f"{folder.name}_Uy_boxavg.txt"
+        if not stress_file.exists() or not disp_file.exists():
+            print(f"Skipping {folder}: missing boxavg files", file=sys.stderr)
+            continue
+        s11 = read_last_column(str(stress_file))
+        d11 = read_last_column(str(disp_file))
+        if s11 is None or d11 is None:
+            continue
+        n = min(len(s11), len(d11))
+        plt.plot(d11[:n], s11[:n], label=f"chi={chi}")
+
+    plt.xlabel('Displacement')
+    plt.ylabel('Stress')
+    plt.title(f"Stress vs Displacement — angle={angle}")
+    plt.legend()
+    plt.grid(True)
+    outdir = Path(outdir) if outdir else Path(parent_dir)
+    outdir.mkdir(parents=True, exist_ok=True)
+    fname = outdir / f"stress11_vs_disp_angle_{angle}.png"
     plt.tight_layout()
     plt.savefig(str(fname), dpi=150)
     print(f"Saved: {fname}")
     return True
-
 
 def plot_mode_chi(parent_dir, chi, outdir):
     runs = collect_runs(parent_dir)
@@ -107,6 +135,34 @@ def plot_mode_chi(parent_dir, chi, outdir):
         n = min(len(s), len(d))
         plt.plot(d[:n], s[:n], label=f"angle={angle}")
 
+    plt.xlabel('Displacement')
+    plt.ylabel('Stress')
+    plt.title(f"Stress vs Displacement — chi={chi}")
+    plt.legend()
+    plt.grid(True)
+    outdir = Path(outdir) if outdir else Path(parent_dir)
+    outdir.mkdir(parents=True, exist_ok=True)
+    fname = outdir / f"stress_vs_disp_chi_{chi}.png"
+    plt.tight_layout()
+    plt.savefig(str(fname), dpi=150)
+    print(f"Saved: {fname}")
+  
+
+    plt.figure()
+    for angle, folder in selected:
+        work = folder / 'domain_cut_analysis'
+        stress_file = work / f"{folder.name}_stress11_boxavg.txt"
+        disp_file = work / f"{folder.name}_Uy_boxavg.txt"
+        if not stress_file.exists() or not disp_file.exists():
+            print(f"Skipping {folder}: missing boxavg files", file=sys.stderr)
+            continue
+        s11 = read_last_column(str(stress_file))
+        d11 = read_last_column(str(disp_file))
+        if s11 is None or d11 is None:
+            continue
+        n = min(len(s11), len(d11))
+        plt.plot(d11[:n], s11[:n], label=f"angle={angle}")
+    
     plt.xlabel('Displacement')
     plt.ylabel('Stress')
     plt.title(f"Stress vs Displacement — chi={chi}")

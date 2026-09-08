@@ -5,6 +5,7 @@ set -e
 
 PARENT_DIR="${1:-.}"
 OUTDIR="${2:-$PARENT_DIR/plots}"
+OUTDIR_MULTI="${2:-$PARENT_DIR/plots/multi}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STRESS22_SCRIPT="$SCRIPT_DIR/stress22_by_chi.py"
@@ -48,13 +49,13 @@ for angle in "${unique_angles[@]}"; do
     python3 "$STRESS22_SCRIPT" --parent_dir "$PARENT_DIR" --angle "$angle" --outdir "$OUTDIR" || echo "Warning: stress22 plot failed for angle $angle"
 
     echo "Plotting stress-vs-displacement overlay for angle=$angle"
-    python3 "$MULTI_SCRIPT" --parent_dir "$PARENT_DIR" --mode angle --angle "$angle" --outdir "$OUTDIR" || echo "Warning: overlay plot failed for angle $angle"
+    python3 "$MULTI_SCRIPT" --parent_dir "$PARENT_DIR" --mode angle --angle "$angle" --outdir "$OUTDIR_MULTI" || echo "Warning: overlay plot failed for angle $angle"
 done
 
 # For each chi: stress vs disp overlay across angles
 for chi in "${unique_chis[@]}"; do
     echo "Plotting stress-vs-displacement overlay for chi=$chi"
-    python3 "$MULTI_SCRIPT" --parent_dir "$PARENT_DIR" --mode chi --chi "$chi" --outdir "$OUTDIR" || echo "Warning: overlay plot failed for chi $chi"
+    python3 "$MULTI_SCRIPT" --parent_dir "$PARENT_DIR" --mode chi --chi "$chi" --outdir "$OUTDIR_MULTI" || echo "Warning: overlay plot failed for chi $chi"
 done
 
 echo "Post-processing complete. Plots in: $OUTDIR"

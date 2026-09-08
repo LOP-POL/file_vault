@@ -17,6 +17,7 @@
 #   - data2vtk command available (for VTK conversion)
 #   - Python 3 with numpy and matplotlib
 #   - plot_stress.py in the same directory as this script
+#   - plot_driving_force_polar.py in the same directory as this script
 #
 ################################################################################
 
@@ -55,21 +56,22 @@ mkdir -p "$OUTDIR"
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLOT_SCRIPT="$SCRIPT_DIR/plot_stress.py"
-PLOT_VTK_SCRIPT="$SCRIPT_DIR/plot_vtk_stress.py"
 PLOT_DISP_SCRIPT="$SCRIPT_DIR/plot_stress_vs_displacement.py"
+PLOT_DRIVING_SCRIPT="$SCRIPT_DIR/plot_driving_force_polar.py"
 
 if [[ ! -f "$PLOT_SCRIPT" ]]; then
     echo "Error: plot_stress.py not found at $PLOT_SCRIPT"
     exit 1
 fi
 
-if [[ ! -f "$PLOT_VTK_SCRIPT" ]]; then
-    echo "Error: plot_vtk_stress.py not found at $PLOT_VTK_SCRIPT"
-    exit 1
-fi
 
 if [[ ! -f "$PLOT_DISP_SCRIPT" ]]; then
     echo "Error: plot_stress_vs_displacement.py not found at $PLOT_DISP_SCRIPT"
+    exit 1
+fi
+
+if [[ ! -f "$PLOT_DRIVING_SCRIPT" ]]; then
+    echo "Error: plot_driving_force_polar.py not found at $PLOT_DRIVING_SCRIPT"
     exit 1
 fi
 
@@ -82,8 +84,8 @@ echo ""
 STRESS_COMPONENTS=("11" "22" "21")
 DOMAIN_OFFSET_X=0
 DOMAIN_OFFSET_Y=0
-DOMAIN_END_X=50
-DOMAIN_END_Y=50
+DOMAIN_END_X=100
+DOMAIN_END_Y=100
 
 # Counter for processed folders
 FOLDER_COUNT=0
@@ -194,16 +196,13 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
         if data2vtk "$SIMGEO_DOM_CUT_FILE"\
             -d "$DOMAIN_CUT_FILE" \
             -a \
-            "$VTK_BASE" 2>/dev/null       
-            ;
-            then
+            "$VTK_BASE" 2>/dev/null ; then
             echo "      VTK files created: ${VTK_BASE}*.vtk"
         else
             echo "      WARNING: data2vtk failed for stress${COMPONENT}"
             continue
         fi
         
-        # Generate plots using both plot_stress.py and plot_vtk_stress.py
         echo "    Generating plots for stress${COMPONENT}..."
         
         # Find all VTK files for this component and use the last frame
@@ -232,19 +231,58 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
         else
             echo "        WARNING: 1D plot generation failed for stress${COMPONENT}"
         fi
-
-        # 2. Generate stress vs displacement plot using the boxaverage txt files (if available)
-        if [[ -f "$STRESS_BOXAVG" && -f "$DISP_BOXAVG" ]]; then
-            echo "      Generating stress vs displacement plot..."
-            if python3 "$PLOT_DISP_SCRIPT" --stressfile "$STRESS_BOXAVG" --displacementfile "$DISP_BOXAVG" --chi "$CHI" --angle "$ANGLE" --component "$COMPONENT" --outdir "$OUTDIR" 2>/dev/null; then
-                echo "        Stress vs displacement plot generated successfully"
-            else
-                echo "        WARNING: stress-vs-displacement plotting failed for stress${COMPONENT}"
-            fi
-        else
-            echo "      WARNING: Missing boxaverage files for stress-vs-displacement plotting"
-        fi
     done
+
+    # Process the saved crack driving-force field. The exact capitalization of
+    # this output name varies between PACE3D versions, so discover it by field name.
+    DRIVING_SRC=$(find "$folder" -maxdepth 1 -type f -iname "${FOLDER_NAME}*driving*force*.p3s" -print -quit)
+    if [[ -z "$DRIVING_SRC" ]]; then
+        echo "  WARNING: No driving-force .p3s file found in $FOLDER_NAME"
+        continue
+    fi
+
+    DRIVING_CUT="$WORK_DIR/${FOLDER_NAME}_driving_force_cut.p3s"
+    DRIVING_SIMGEO="$WORK_DIR/${FOLDER_NAME}_driving_force_cut.p3simgeo"
+    DRIVING_BASE="$WORK_DIR/${FOLDER_NAME}_driving_force_vtk"
+    echo "  Creating domain cut for driving force from $(basename "$DRIVING_SRC")..."
+    if ! domaincut "$DRIVING_SRC" "$DRIVING_CUT" \
+        -x "$DOMAIN_OFFSET_X" -X "$DOMAIN_END_X" \
+        -y "$DOMAIN_OFFSET_Y" -Y "$DOMAIN_END_Y" \
+        -f 2>/dev/null; then
+        echo "  WARNING: domaincut failed for driving force"
+        continue
+    fi
+
+    if [[ ! -f "$DRIVING_SIMGEO" ]]; then
+        echo "  WARNING: driving-force domain cut did not create $DRIVING_SIMGEO"
+        continue
+    fi
+
+    echo "  Converting driving force to VTK format..."
+    if ! data2vtk "$DRIVING_SIMGEO" -d "$DRIVING_CUT" -a "$DRIVING_BASE" 2>/dev/null; then
+        echo "  WARNING: data2vtk failed for driving force"
+        continue
+    fi
+
+    mapfile -t DRIVING_VTK_FILES < <(find "$WORK_DIR" -maxdepth 1 -type f \
+        -name "${FOLDER_NAME}_driving_force_vtk-*.vtk" | sort -V)
+    if [[ ${#DRIVING_VTK_FILES[@]} -lt 3 ]]; then
+        echo "  WARNING: Need at least 3 driving-force VTK frames, found ${#DRIVING_VTK_FILES[@]}"
+        continue
+    fi
+
+    THIRD_LAST_INDEX=$((${#DRIVING_VTK_FILES[@]} - 3))
+    DRIVING_VTK_FILE="${DRIVING_VTK_FILES[$THIRD_LAST_INDEX]}"
+    echo "  Using third-last driving-force frame: $(basename "$DRIVING_VTK_FILE")"
+    if python3 "$PLOT_DRIVING_SCRIPT" \
+        --infile "$DRIVING_VTK_FILE" \
+        --chi "$CHI" \
+        --angle "$ANGLE" \
+        --outdir "$OUTDIR" 2>/dev/null; then
+        echo "  Driving-force polar plot generated successfully"
+    else
+        echo "  WARNING: Driving-force polar plot generation failed"
+    fi
 done
 
 echo "==============================================="

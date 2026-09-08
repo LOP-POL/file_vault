@@ -344,7 +344,7 @@ def plot_stress_vs_displacement_files(stress_path, disp_path, outdir, chi, angle
     plt.xlabel('Displacement (boxaverage last column)')
     plt.ylabel('Stress')
     title_comp = f" {comp_tag}" if component else ""
-    plt.title(f"Stress vs Displacement{title_comp} — chi={chi_str}, angle={angle_str}")
+    plt.title(f"Stress_{comp_tag} vs Displacement{title_comp} — chi={chi_str}, angle={angle_str}")
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(str(out_path), dpi=150)
@@ -405,12 +405,29 @@ def main():
 
     # If the user provided stressfile + displacementfile, produce a stress-vs-displacement plot
     if args.stressfile and args.displacementfile:
-        ok = plot_stress_vs_displacement_files(args.stressfile, args.displacementfile, args.outdir, args.chi, args.angle, args.component)
-        if not ok:
-            sys.exit(1)
-        if args.show:
-            plt.show()
-        sys.exit(0)
+        try:
+            ok = plot_stress_vs_displacement_files(
+                args.stressfile,
+                args.displacementfile,
+                args.outdir,
+                args.chi,
+                args.angle,
+                args.component,
+            )
+            if not ok:
+                print(
+                    "Error: could not create stress-vs-displacement plot.",
+                    file=sys.stderr,
+                )
+            else:
+                if args.show:
+                    plt.show()
+                return
+        except Exception as exc:
+            print(
+                f"Error creating stress-vs-displacement plot: {exc}",
+                file=sys.stderr,
+            )
 
     infile = Path(args.infile)
     if not infile.is_file():
@@ -459,8 +476,8 @@ def main():
     outdir.mkdir(parents=True, exist_ok=True)
 
     visulize_whole_field(args.outdir, infile.parent,angle_str,chi_str,stress_man,component)
-    plot_stress_vs_x_fixed_y(x_values_man,stress_man,48,infile.parent,component,chi_str,angle_str, outdir)
-    plot_stress_vs_y_fixed_x(y_values_man,stress_man,48,infile.parent,component,chi_str,angle_str, outdir)
+    plot_stress_vs_x_fixed_y(x_values_man,stress_man,50,infile.parent,component,chi_str,angle_str, outdir)
+    #plot_stress_vs_y_fixed_x(y_values_man,stress_man,50,infile.parent,component,chi_str,angle_str, outdir)
 
     if args.show:
         plt.show()

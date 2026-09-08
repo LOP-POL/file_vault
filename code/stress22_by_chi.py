@@ -64,7 +64,10 @@ def main():
         sys.exit(1)
 
     chis = []
+    chis11 = []
     stresses = []
+
+    stresses11 = []
     for chi, folder in folders:
         work = folder / 'domain_cut_analysis'
         # boxavg filename pattern
@@ -81,6 +84,22 @@ def main():
         chis.append(chi)
         stresses.append(val)
 
+    for chi, folder in folders:
+        work = folder / 'domain_cut_analysis'
+        # boxavg filename pattern
+        fname11 = f"{folder.name}_stress11_boxavg.txt"
+        fpath11 = work / fname11
+        if not fpath11.exists():
+            print(f"Warning: missing {fpath11}, skipping", file=sys.stderr)
+            continue
+        arr = read_last_column(str(fpath11))
+        if arr is None or len(arr) == 0:
+            print(f"Warning: empty data in {fpath11}", file=sys.stderr)
+            continue
+        val = float(arr[-1])
+        chis11.append(chi)
+        stresses11.append(val)
+
     if not chis:
         print("No valid stress data found.", file=sys.stderr)
         sys.exit(1)
@@ -89,7 +108,9 @@ def main():
     outdir.mkdir(parents=True, exist_ok=True)
 
     plt.figure()
-    plt.plot(chis, stresses, marker='o', linestyle='-')
+    plt.plot(chis, stresses, marker='o', linestyle='-',)
+    for xi, yi in zip(chis,stresses):
+        plt.text(xi, yi, str(yi), ha='center', va='bottom')
     plt.xlabel('chi')
     plt.ylabel('Stress22 (final boxaverage value)')
     plt.title(f"Stress22 vs chi — angle={args.angle}")
@@ -98,6 +119,19 @@ def main():
     plt.tight_layout()
     plt.savefig(str(fname), dpi=150)
     print(f"Saved: {fname}")
+
+    plt.figure()
+    plt.plot(chis11, stresses11, marker='o', linestyle='-')
+    for xi, yi in zip(chis11,stresses11):
+        plt.text(xi, yi, str(yi), ha='center', va='bottom')
+    plt.xlabel('chi')
+    plt.ylabel('Stress11 (final boxaverage value)')
+    plt.title(f"Stress11 vs chi — angle={args.angle}")
+    plt.grid(True)
+    fname11 = outdir / f"stress11_vs_chi_angle_{args.angle}.png"
+    plt.tight_layout()
+    plt.savefig(str(fname11), dpi=150)
+    print(f"Saved: {fname11}")
 
 
 if __name__ == '__main__':
