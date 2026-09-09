@@ -188,12 +188,11 @@ $\boxed{1,\ 2.5,\ 6.3,\ 16}$
 
 The next value would be approximately **40**, which is above your limit of 30.
 
-
 # Tests
 
 ## September 1st
 
-Tests Carried out on septemebre first had a few bugs I found later 
+Tests Carried out on septemebre first had a few bugs I found later
 
 I didn't add to the stiffness matricies the chi anisotropy parameter correctly.
 
@@ -201,7 +200,7 @@ The chi value was in the wrong place. I have to put it inside the matrix for **b
 
 **So thesis tests are invalid.**
 
-However the crack grew straight in every experiment. 
+However the crack grew straight in every experiment.
 
 The angle seems to have a noticable effect on driving force and stress distribution so that is good.
 
@@ -213,4 +212,31 @@ Changes I have made:
 
 - Added chi to both the c11 components of the stiffnesss for both the phases a0 and b0.
 - Multiplied the chi value by 10³ so it has an actual in fluence on the stiffness.
--
+
+# September 3rd to 8th
+
+The tests foe the anisotropic crack resistance kept blowing up and showed massive instability throughtout.
+
+Modifications to be made to the anisotropic crack resistance files will be to
+
+- lower the `gc_ratio` from **sqrt(0.2)**  to just 2, 0.33, 0.5 and maybe 3
+- Lower the mobility to by an order of **10**  from 1e-4 to 1e-5
+
+In the `obstacle` tests for no crack and crack:
+
+**No crack**  yielded correct results however it must be menstioned that thsi was obly do able because the crack was flipped to be vertical
+
+## \#TODO:
+
+> - Rerun the crack and no crack tests with a much higher chi value of the **transversely anisotropic** stiffness.
+> - Come up with an analytical value of the how the stiffness depends upon the angle $\phi$ when the stiffness matrix is rotated along with the angle of orientation
+> - Find a way to correct the anisotropic resistance infiles and formulation
+> - Test to see of there is infeact compressive stress peaks at the tip of a compressive test using the old formulation and if so then compare it to mine
+>
+>   - This will show that my formulation is actually correct for obstacle crack resistance
+
+## Tests:
+
+The tests to be carried out.
+
+Fully isotropic test with old formulation.
