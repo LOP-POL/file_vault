@@ -17,11 +17,11 @@ Example:
 import re
 import sys
 from pathlib import Path
-
 # --- Sweep values ------------------------------------------------------
-# chi: R2 preferred-number series values requested (replaces the plan's
+# chi: R2 preferred-number series values (replaces the plan's
 # 0, 1, 2, 5, 10, 20 list)
-CHI_VALUES = [1, 2, 6, 16]
+
+CHI_VALUES = list(map(lambda x: x/10, [2,4,6,8,10]))
 
 # angle: straight from the verification plan
 ANGLE_VALUES = [0, 30, 45, 60, 90]
