@@ -32,7 +32,10 @@ for chi in chi_values:
         chi,
         sigma11,
         sigma22,
-        sigma12
+        sigma12,
+        C11,
+        C22,
+        C12
     ])
 
 if __name__ == '__main__':
@@ -42,6 +45,9 @@ if __name__ == '__main__':
         print(f'sig_11 value: {result[1]} \n')
         print(f'sig_22 value: {result[2]}\n')
         print(f'sig_12 value: {result[3]} \n')
+        print(f'C11 value: {round(result[4],2)} \n')
+        print(f'C22 value: {round(result[5],2)} \n')
+        print(f'C12 value: {round(result[6],2)} \n')
         
 
     
