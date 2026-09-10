@@ -243,6 +243,10 @@ These are the values to be used in the test. I will be using a chi value that is
 
 The perecentages will increase by 0.2 so we shall have 
 
+It has been confiremedd that there are in fact compressive stresses that remain after the compression tests despite teh splits 
+
+![1789045452485](image/modelling_verification_plan/1789045452485.png)
+
 
 ```Shell
 The chi values -> [56538, 113077, 169615, 226154, 282692]
