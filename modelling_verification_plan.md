@@ -239,4 +239,14 @@ In the `obstacle` tests for no crack and crack:
 
 The tests to be carried out.
 
-Fully isotropic test with old formulation.
+These are the values to be used in the test. I will be using a chi value that is a **percentage** of the C11 value. 
+
+The perecentages will increase by 0.2 so we shall have 
+
+
+```Shell
+The chi values -> [56538, 113077, 169615, 226154, 282692]
+The pecentage increase -> [0.2, 0.4, 0.6, 0.8, 1.0]
+The C11 value: 282692
+The chi value plus the C11 value -> [339231, 395769, 452308, 508846, 565385]
+```

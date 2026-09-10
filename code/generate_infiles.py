@@ -17,12 +17,14 @@ Example:
 import re
 import sys
 from pathlib import Path
+from analytical_calc import calculate_stiffness_conts
 # --- Sweep values ------------------------------------------------------
 # chi: R2 preferred-number series values (replaces the plan's
 # 0, 1, 2, 5, 10, 20 list)
 
-CHI_VALUES = list(map(lambda x: x/10, [2,4,6,8,10]))
+# chi_values = [i[0] for i in calculate_stiffness_conts()]
 
+CHI_VALUES = [i[0] for i in calculate_stiffness_conts()]
 # angle: straight from the verification plan
 ANGLE_VALUES = [0, 30, 45, 60, 90]
 
@@ -86,14 +88,14 @@ def main():
     prefix = derive_prefix(template_path.name)
 
     generated = []
-    for chi in CHI_VALUES:
+    for chi in range(len(CHI_VALUES)):
         for angle in ANGLE_VALUES:
             # Chi has to be in giga so I multiply it by 10³ 
-            text = CHI_LINE_RE.sub(rf'\g<1>{format_number((chi*10**3))}', template_text)
+            text = CHI_LINE_RE.sub(rf'\g<1>{format_number((CHI_VALUES[chi]))}', template_text)
             text = ANGLE_LINE_RE.sub(rf'\g<1>{format_number(angle)}', text)
 
             filename = (
-                f"{prefix}_chi_{format_for_filename(chi)}"
+                f"{prefix}_chi_{format_for_filename(chi+1)}"
                 f"_angle_{format_for_filename(angle)}.infile"
             )
             out_path = output_dir / filename
