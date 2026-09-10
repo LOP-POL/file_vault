@@ -226,16 +226,16 @@ In the `obstacle` tests for no crack and crack:
 
 **No crack**  yielded correct results however it must be menstioned that thsi was obly do able because the crack was flipped to be vertical
 
-## \#TODO:
+## \#TODO
 
-> - Rerun the crack and no crack tests with a much higher chi value of the **transversely anisotropic** stiffness.
-> - Come up with an analytical value of the how the stiffness depends upon the angle $\phi$ when the stiffness matrix is rotated along with the angle of orientation
-> - Find a way to correct the anisotropic resistance infiles and formulation
-> - Test to see of there is infeact compressive stress peaks at the tip of a compressive test using the old formulation and if so then compare it to mine
+> - [ ] Rerun the crack and no crack tests with a much higher chi value of the **transversely anisotropic** stiffness.
+> - [ ] Come up with an analytical value of the how the stiffness depends upon the angle $\phi$ when the stiffness matrix is rotated along with the angle of orientation
+> - [X] Find a way to correct the anisotropic resistance infiles and formulation
+> - [X] Test to see of there is infeact compressive stress peaks at the tip of a compressive test using the old formulation and if so then compare it to mine
+> - [ ] Make a script that plots teh stress vs angle for different chi values
 >
->   - This will show that my formulation is actually correct for obstacle crack resistance
 
-## Tests:
+# Tests
 
 The tests to be carried out.
 

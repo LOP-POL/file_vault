@@ -9,10 +9,15 @@ OUTDIR_MULTI="${2:-$PARENT_DIR/plots/multi}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STRESS22_SCRIPT="$SCRIPT_DIR/stress22_by_chi.py"
+STRESS_ANGLE_SCRIPT="$SCRIPT_DIR/stress_by_angle.py"
 MULTI_SCRIPT="$SCRIPT_DIR/plot_stress_vs_disp_multiple.py"
 
 if [[ ! -f "$STRESS22_SCRIPT" ]]; then
     echo "Missing $STRESS22_SCRIPT"
+    exit 1
+fi
+if [[ ! -f "$STRESS_ANGLE_SCRIPT" ]]; then
+    echo "Missing $STRESS_ANGLE_SCRIPT"
     exit 1
 fi
 if [[ ! -f "$MULTI_SCRIPT" ]]; then
@@ -50,6 +55,12 @@ for angle in "${unique_angles[@]}"; do
 
     echo "Plotting stress-vs-displacement overlay for angle=$angle"
     python3 "$MULTI_SCRIPT" --parent_dir "$PARENT_DIR" --mode angle --angle "$angle" --outdir "$OUTDIR_MULTI" || echo "Warning: overlay plot failed for angle $angle"
+done
+
+# For each chi: stress22 and stress11 vs angle
+for chi in "${unique_chis[@]}"; do
+    echo "Plotting stress vs angle for chi=$chi"
+    python3 "$STRESS_ANGLE_SCRIPT" --parent_dir "$PARENT_DIR" --chi "$chi" --outdir "$OUTDIR" || echo "Warning: stress-by-angle plot failed for chi $chi"
 done
 
 # For each chi: stress vs disp overlay across angles
