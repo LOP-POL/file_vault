@@ -126,7 +126,7 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
         if domaincut "$DISP_SRC" "$DISP_CUT" -x "$DOMAIN_OFFSET_X" -X "$DOMAIN_END_X" -y "$DOMAIN_OFFSET_Y" -Y "$DOMAIN_END_Y" -f 2>/dev/null; then
             echo "    Displacement domain cut created: $DISP_CUT"
             echo "  Running boxaveragecells for displacement..."
-            if boxaveragecells "$DISP_CUT" -b "[${DOMAIN_OFFSET_X},${DOMAIN_OFFSET_Y},0],[${DOMAIN_END_X},${DOMAIN_END_Y},0]" > "$DISP_BOXAVG" 2>/dev/null; then
+            if boxaveragecells "$DISP_CUT" -b ""[0,0,0],[0,100,0]"> "$DISP_BOXAVG" 2>/dev/null; then
                 echo "    Displacement boxaverage saved: $DISP_BOXAVG"
             else
                 echo "    WARNING: boxaveragecells failed for displacement"
@@ -170,7 +170,7 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
         # Run boxaverage on the stress domain-cut file to produce a txt summary
         STRESS_BOXAVG="$WORK_DIR/${FOLDER_NAME}_stress${COMPONENT}_boxavg.txt"
         echo "    Running boxaveragecells for stress${COMPONENT}..."
-        if boxaveragecells "$DOMAIN_CUT_FILE" -b "[${DOMAIN_OFFSET_X},${DOMAIN_OFFSET_Y},0],[${DOMAIN_END_X},${DOMAIN_END_Y},0]" > "$STRESS_BOXAVG" 2>/dev/null; then
+        if boxaveragecells "$DOMAIN_CUT_FILE" -b "[0,0,0],[0,100,0]" > "$STRESS_BOXAVG" 2>/dev/null; then
             echo "      Stress boxaverage saved: $STRESS_BOXAVG"
         else
             echo "      WARNING: boxaveragecells failed for stress${COMPONENT}"

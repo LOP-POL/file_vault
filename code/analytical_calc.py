@@ -66,6 +66,66 @@ class experiment:
             [0.0, 0.0, 0.0, 0.0, 0.0, C44],
         ]
 
+        self.compliance = [[[[0.0] * 3 for _ in range(3)] for _ in range(3)] for _ in range(3)] # creating a fourth order tensor with zeros
+        self.strain = [[0.0]*3 for _ in range(3)]
+        self.stress = [[0.0]*3 for _ in range(3)]
+        
+
+    #TODO: calculate the compliance of teh stiffness tensor sostrain can be got from stress.
+    def calculate_compliance(self):
+        return
+    # Getters
+    def get_component(self, i, j):
+        """Return a component using 1-based Voigt notation."""
+        if not (1 <= i <= 6 and 1 <= j <= 6):
+            raise IndexError("Voigt indices must be between 1 and 6")
+        return self.stiffness[i - 1][j - 1]
+
+    def get_strain_component(self, i,j):
+        """Return a component using 1-based Voigt notation. for strain"""
+        if not (1 <= i <= 3 and 1 <= j <= 3):
+            raise IndexError("Voigt indices must be between 1 and 3")
+        return self.strain[i-i][i-j]   
+
+    def get_stress_component(self, i,j):
+        """Return a component using 1-based Voigt notation. for stress"""
+        if not (1 <= i <= 3 and 1 <= j <= 3):
+            raise IndexError("Voigt indices must be between 1 and 3")
+        return self.stress[i-i][i-j]   
+    
+
+    def set_strain_component(self,i,j,value):
+        self.strain[i-1][j-1] = value
+
+    def set_stress_component(self,i,j,value):
+        self.stress[i-1][j-1] = value
+
+    # mutations
+    # TODO: make a strain component calculator thatw ill take the compliance of the stiffness matrix 
+    # and use the stress to do a dot product of the two to make a stiffness tensor 
+    def calc_strain_components(self):
+        
+        return
+    """Ony implemented for 2D stiffness as of now"""
+    def calc_stress_components(self):
+        strain_voigt = [
+            self.strain[0][0],
+            self.strain[1][1],
+            self.strain[2][2],
+            2.0 * self.strain[1][2],
+            2.0 * self.strain[0][2],
+            2.0 * self.strain[0][1],
+        ]
+        stress_voigt = [
+            sum(stiffness * strain for stiffness, strain in zip(row, strain_voigt))
+            for row in self.stiffness
+        ]
+        self.stress = [
+            [stress_voigt[0], stress_voigt[5], stress_voigt[4]],
+            [stress_voigt[5], stress_voigt[1], stress_voigt[3]],
+            [stress_voigt[4], stress_voigt[3], stress_voigt[2]],
+        ]
+        return self.stress
     
     def rotate(self, angle):
         """Rotate the stiffness tensor about the z axis by ``angle`` radians."""
@@ -101,12 +161,8 @@ class experiment:
             a = angle * pi/180
             return self.rotate(a)
             
-        
-    def get_component(self, i, j):
-        """Return a component using 1-based Voigt notation."""
-        if not (1 <= i <= 6 and 1 <= j <= 6):
-            raise IndexError("Voigt indices must be between 1 and 6")
-        return self.stiffness[i - 1][j - 1]
+   
+
 
 def degrees_to_radians(angle):
     return angle * pi/180
