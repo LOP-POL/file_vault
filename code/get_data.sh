@@ -17,7 +17,7 @@
 #   - data2vtk command available (for VTK conversion)
 #   - Python 3 with numpy and matplotlib
 #   - plot_stress.py in the same directory as this script
-#   - plot_driving_force_polar.py in the same directory as this script
+#   - plot_polar.py in the same directory as this script
 #
 ################################################################################
 
@@ -57,7 +57,7 @@ mkdir -p "$OUTDIR"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLOT_SCRIPT="$SCRIPT_DIR/plot_stress.py"
 PLOT_DISP_SCRIPT="$SCRIPT_DIR/plot_stress_vs_displacement.py"
-PLOT_DRIVING_SCRIPT="$SCRIPT_DIR/plot_driving_force_polar.py"
+PLOT_DRIVING_SCRIPT="$SCRIPT_DIR/plot_polar.py"
 
 if [[ ! -f "$PLOT_SCRIPT" ]]; then
     echo "Error: plot_stress.py not found at $PLOT_SCRIPT"
@@ -71,7 +71,7 @@ if [[ ! -f "$PLOT_DISP_SCRIPT" ]]; then
 fi
 
 if [[ ! -f "$PLOT_DRIVING_SCRIPT" ]]; then
-    echo "Error: plot_driving_force_polar.py not found at $PLOT_DRIVING_SCRIPT"
+    echo "Error: plot_polar.py not found at $PLOT_DRIVING_SCRIPT"
     exit 1
 fi
 
@@ -126,7 +126,7 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
         if domaincut "$DISP_SRC" "$DISP_CUT" -x "$DOMAIN_OFFSET_X" -X "$DOMAIN_END_X" -y "$DOMAIN_OFFSET_Y" -Y "$DOMAIN_END_Y" -f 2>/dev/null; then
             echo "    Displacement domain cut created: $DISP_CUT"
             echo "  Running boxaveragecells for displacement..."
-            if boxaveragecells "$DISP_CUT" -b ""[0,0,0],[0,100,0]"> "$DISP_BOXAVG" 2>/dev/null; then
+                if boxaveragecells "$DISP_CUT" -b "[0,0,0],[0,100,0]" > "$DISP_BOXAVG" 2>/dev/null; then
                 echo "    Displacement boxaverage saved: $DISP_BOXAVG"
             else
                 echo "    WARNING: boxaveragecells failed for displacement"

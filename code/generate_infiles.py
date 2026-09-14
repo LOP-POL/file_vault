@@ -24,7 +24,8 @@ from analytical_calc import calculate_stiffness_conts
 
 # chi_values = [i[0] for i in calculate_stiffness_conts()]
 
-CHI_VALUES = [i[0] for i in calculate_stiffness_conts()]
+# CHI_VALUES = [i[0] for i in calculate_stiffness_conts()]
+CHI_VALUES = [0]
 # angle: straight from the verification plan
 ANGLE_VALUES = [0, 30, 45, 60, 90]
 
