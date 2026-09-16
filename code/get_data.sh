@@ -116,17 +116,17 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
     
     echo "  Creating domain cuts and VTK files..."
     
-    # Create domain cut + boxaverage for displacement (Uy)
-    DISP_SRC="$folder/${FOLDER_NAME}.SolidMechanics_Uy.p3s"
-    DISP_CUT="$WORK_DIR/${FOLDER_NAME}_Uy_cut.p3s"
-    DISP_BOXAVG="$WORK_DIR/${FOLDER_NAME}_Uy_boxavg.txt"
+    # Create domain cut + boxaverage for displacement (Ux)
+    DISP_SRC="$folder/${FOLDER_NAME}.SolidMechanics_Ux.p3s"
+    DISP_CUT="$WORK_DIR/${FOLDER_NAME}_Ux_cut.p3s"
+    DISP_BOXAVG="$WORK_DIR/${FOLDER_NAME}_Ux_boxavg.txt"
 
     if [[ -f "$DISP_SRC" ]]; then
-        echo "  Creating domain cut for displacement (Uy)..."
+        echo "  Creating domain cut for displacement (Ux)..."
         if domaincut "$DISP_SRC" "$DISP_CUT" -x "$DOMAIN_OFFSET_X" -X "$DOMAIN_END_X" -y "$DOMAIN_OFFSET_Y" -Y "$DOMAIN_END_Y" -f 2>/dev/null; then
             echo "    Displacement domain cut created: $DISP_CUT"
             echo "  Running boxaveragecells for displacement..."
-                if boxaveragecells "$DISP_CUT" -b "[0,0,0],[0,100,0]" > "$DISP_BOXAVG" 2>/dev/null; then
+                if boxaveragecells "$DISP_CUT" -b "[100,1,0],[100,100,0]" > "$DISP_BOXAVG" 2>/dev/null; then
                 echo "    Displacement boxaverage saved: $DISP_BOXAVG"
             else
                 echo "    WARNING: boxaveragecells failed for displacement"
@@ -170,7 +170,7 @@ for folder in "$PARENT_DIR"/transversely_iso_no_crack_chi_*_angle_*; do
         # Run boxaverage on the stress domain-cut file to produce a txt summary
         STRESS_BOXAVG="$WORK_DIR/${FOLDER_NAME}_stress${COMPONENT}_boxavg.txt"
         echo "    Running boxaveragecells for stress${COMPONENT}..."
-        if boxaveragecells "$DOMAIN_CUT_FILE" -b "[0,0,0],[0,100,0]" > "$STRESS_BOXAVG" 2>/dev/null; then
+        if boxaveragecells "$DOMAIN_CUT_FILE" -b "[100,1,0],[100,100,0]" > "$STRESS_BOXAVG" 2>/dev/null; then
             echo "      Stress boxaverage saved: $STRESS_BOXAVG"
         else
             echo "      WARNING: boxaveragecells failed for stress${COMPONENT}"

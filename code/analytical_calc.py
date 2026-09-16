@@ -1,5 +1,5 @@
 from math import log, pi
-def calculate_stiffness_conts(E=None,nu=None,no_values=6):
+def calculate_stiffness_conts(E=None,nu=None,no_values=5):
 
     if E is None:
         E = 210*10**3
