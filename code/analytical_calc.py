@@ -1,5 +1,5 @@
 from math import log, pi
-def calculate_stiffness_conts(E=None,nu=None,no_values=5):
+def calculate_stiffness_conts(E=None,nu=None,no_values=6):
 
     if E is None:
         E = 210*10**3
@@ -14,7 +14,7 @@ def calculate_stiffness_conts(E=None,nu=None,no_values=5):
     eps12 = 0.0
 
     results = []
-    increment = 0.2
+    increment = 0.0
     for step in range(no_values):
         C11 = lambda_ + 2 * mu
         chi = C11 * increment
@@ -49,7 +49,7 @@ def calculate_stiffness_conts(E=None,nu=None,no_values=5):
 class experiment:
     """An elastic stiffness tensor represented in 6x6 Voigt notation."""
 
-    def __init__(self, E=None, nu=None, no_values=5,for_chi=0):
+    def __init__(self, E=None, nu=None, no_values=6,for_chi=0):
         result = calculate_stiffness_conts(E, nu, no_values)[for_chi]
         chi, C11, C12, C11_mod = result[0], result[4], result[6], result[7]
         if E is None:
@@ -199,16 +199,19 @@ def calculate_renard_series(ratio=None, series=None, decimal_places=2, no_values
     ]
 
 if __name__ == '__main__':
-    Experiment = experiment(for_chi=1)
-    component_before_rotation = Experiment.get_component(i=1,j=1)
-    Experiment.rotate_deg(45)
+    Experiment = experiment(for_chi=0)
     component = Experiment.get_component(i=1,j=1)
-    print([round(i[0]) for i in calculate_stiffness_conts()])
-    print([i[8] for i in calculate_stiffness_conts()])
-    print([round(i[4]) for i in calculate_stiffness_conts()])
-    print([round(i[7]) for i in calculate_stiffness_conts()])
+    stiffness = Experiment.stiffness
+    Experiment.set_strain_component(1,1,1e-2)
+    Experiment.calc_stress_components()
+    stress11 =  Experiment.get_stress_component(1,1)
+    print(f"stress 11 {stress11}")
+    # print([round(i[0]) for i in calculate_stiffness_conts()])
+    # print([i[8] for i in calculate_stiffness_conts()])
+    # print([round(i[4]) for i in calculate_stiffness_conts()])
+    # print([round(i[7]) for i in calculate_stiffness_conts()])
     print(f'component11: {component}')
-    print(f'component11 before rotation: {component_before_rotation}')
+    print(f"stiffness {stiffness}")
     
 
     #     print("\n-----------------------------")

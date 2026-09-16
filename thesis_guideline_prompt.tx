@@ -1,0 +1,40 @@
+Systematically refine the overall structure of this thesis:
+
+Introduction/Literature Review/Background:
+Start with fracture in general, followed by modeling, and phase-field fracture models. Tension compression split, what is it and why is it required. What splits exist (Miehe's spectral split, Strom's splits, anisotropic splits in Lubarda teichtmester, your new split from the reference paper). Briefly discuss this new split, and how it should solve the problem for anisotropic elasticity. Then talk, that this thesis research focusses on implementation, validation and simulation studies of the anisotropic tension compression split, with applications for transverse anisotropic materials. 
+
+Methods:
+Crack phase field model with anisotropic crack resistance (Prajapati et al. 2026)
+-Add anisotropic elasticity (transverse anisotropy) equations
+-New Tension compression split equation
+
+--Numerical implemntation:
+pseudo-code
+
+
+Results and Discussion Section:
+1) Validation of Elastic anisotropy with analytical relations (No-crack)
+-stress11, stress22,stress12 vs anisotropic parameters for a given applied uniaxial strain
+- effect of chi
+-effect of orientation theta
+
+2) Tension compression split -with crack
+-isotropic crack resistance (single obstacle)
+-With and without split (compression test)-for a given chi and theta
+--Show plots and crack results
+--Obstacle vs well- mechanical plots and crack paths
+
+-anisotropic crack resistance (single_obstacle_aniso)-Tension test
+--isotropic elasticity vs new anisotropic elasticity (crack path, stress strain  response)
+---For different values of chi 
+
+---Test tension vs compression for anisotropic crack resentant and anisotropic elasticity
+
+-Thermoelastic fracture application in a multiphase-system.
+---More optional results could be higher anisotropies (e.g. orthotropic, cubic. triclinic)
+
+Conclusion and Outlook:
+Implemented anisotorpic tension compression split in Pace3D in C programming language. Details of pace3d (Multiphysics software packagae at IAM-MMS, highly parallelized, with 600k+ lines of code). Validated the implementation using simulation benchmark cases. Discussion of take home messages from this work. This work will enable modeling of physically realistic crack phenomenon in anisotropic elastic materials., which was previously missing in pace3D.
+
+Outlook on what could be achieved now. 
+Extension to plasticity, thermal, and chemical effects. Battery electrodes have ansitropic elastic properties.

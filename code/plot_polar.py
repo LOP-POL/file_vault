@@ -419,10 +419,10 @@ def main():
     ax.set_title(title)
 
     # Put 0 degrees at the top
-    ax.set_theta_zero_location("N")
+    #ax.set_theta_zero_location("N")
 
     # Make angle increase clockwise
-    ax.set_theta_direction(-1)
+    #ax.set_theta_direction(-1)
 
     ax.set_thetamin(0)
     ax.set_thetamax(90)
