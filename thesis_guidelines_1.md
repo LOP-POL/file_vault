@@ -1,4 +1,3 @@
-
 Your current structure has the right scientific content, but I would reorganize it so that the **logic of the thesis follows the development of the model**:
 
 **physical problem → existing modeling framework → identified limitation → proposed solution → implementation → verification/validation → applications → conclusions.**
@@ -405,6 +404,9 @@ $$
 
 This turns "the plots look right" into a genuine numerical verification.
 
+write results for 0 and 90 degress and that they are exactly matching 
+
+
 ---
 
 # 5. Fracture Results and Discussion
@@ -490,14 +492,20 @@ This is where all the components come together:
 Compare:
 
 * Tension
+
+  * In the tgension stuy fix - angle to 45 , gc_ratio =2 and vary chi from 0.0 to 3 values and analyse crack paths , analyse stress displacement curves and explain them.
+
+  Show contour paths of r´driving force for tension
 * Compression
+
+  * Show the stress displacement cureves and you should expect linear
+  * show anisotropic crack res does not play a role by overlaying the stress disp cureve for aniso stiffness with and without aniso crack res.
 * Crack evolution
 * Stress–strain response
 * Dependence on \(\chi\) and/or \(\theta\)
 
 This demonstrates the complete implementation rather than isolated components.
 
----
 
 # 5.5 Application: Thermoelastic fracture in a multiphase system
 

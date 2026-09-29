@@ -59,7 +59,7 @@ def plot_mode_angle(parent_dir, angle, outdir):
     for chi, folder in selected:
         work = folder / 'domain_cut_analysis'
         stress_file = work / f"{folder.name}_stress22_boxavg.txt"
-        disp_file = work / f"{folder.name}_Uy_boxavg.txt"
+        disp_file = work / f"{folder.name}_Ux_boxavg.txt"
         if not stress_file.exists() or not disp_file.exists():
             print(f"Skipping {folder}: missing boxavg files", file=sys.stderr)
             continue
@@ -88,7 +88,7 @@ def plot_mode_angle(parent_dir, angle, outdir):
     for chi, folder in selected:
         work = folder / 'domain_cut_analysis'
         stress_file = work / f"{folder.name}_stress11_boxavg.txt"
-        disp_file = work / f"{folder.name}_Uy_boxavg.txt"
+        disp_file = work / f"{folder.name}_Ux_boxavg.txt"
         if not stress_file.exists() or not disp_file.exists():
             print(f"Skipping {folder}: missing boxavg files", file=sys.stderr)
             continue
@@ -124,7 +124,7 @@ def plot_mode_chi(parent_dir, chi, outdir):
     for angle, folder in selected:
         work = folder / 'domain_cut_analysis'
         stress_file = work / f"{folder.name}_stress22_boxavg.txt"
-        disp_file = work / f"{folder.name}_Uy_boxavg.txt"
+        disp_file = work / f"{folder.name}_Ux_boxavg.txt"
         if not stress_file.exists() or not disp_file.exists():
             print(f"Skipping {folder}: missing boxavg files", file=sys.stderr)
             continue
@@ -152,7 +152,7 @@ def plot_mode_chi(parent_dir, chi, outdir):
     for angle, folder in selected:
         work = folder / 'domain_cut_analysis'
         stress_file = work / f"{folder.name}_stress11_boxavg.txt"
-        disp_file = work / f"{folder.name}_Uy_boxavg.txt"
+        disp_file = work / f"{folder.name}_Ux_boxavg.txt"
         if not stress_file.exists() or not disp_file.exists():
             print(f"Skipping {folder}: missing boxavg files", file=sys.stderr)
             continue

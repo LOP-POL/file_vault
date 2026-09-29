@@ -210,9 +210,6 @@ if __name__ == '__main__':
     # print([i[8] for i in calculate_stiffness_conts()])
     # print([round(i[4]) for i in calculate_stiffness_conts()])
     # print([round(i[7]) for i in calculate_stiffness_conts()])
-    print(f'component11: {component}')
-    print(f"stiffness {stiffness}")
-    
 
     #     print("\n-----------------------------")
     #     print(f'chi value: {result[0]} \n')

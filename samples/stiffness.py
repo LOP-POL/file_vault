@@ -10,7 +10,7 @@ orthotropic_clear_wood = [
 ]
 
 orthotropic_clear_wood = [
-    tuple(v * 1000 for v in row)
+    tuple(v * 10e6 for v in row)
     for row in [
         (9000.016, 269.384, 175.104, 0.0, 0.0, 0.0),
         (269.384, 480.096, 118.528, 0.0, 0.0, 0.0),
@@ -24,5 +24,5 @@ orthotropic_clear_wood = [
 
 if __name__ == "__main__":
     print(f"wood {orthotropic_clear_wood}")
-    print(f"femur {orthotropic_human_femur}")
+  
    
