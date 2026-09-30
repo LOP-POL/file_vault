@@ -1,5 +1,5 @@
 from math import log, pi
-def calculate_stiffness_conts(E=None,nu=None,no_values=5):
+def calculate_stiffness_conts(E=None,nu=None,no_values=6):
 
     if E is None:
         E = 210*10**3
@@ -9,8 +9,8 @@ def calculate_stiffness_conts(E=None,nu=None,no_values=5):
     lambda_ = E*nu/((1.0+nu)*(1.0-2.0*nu))
     mu = E/(2.0*(1.0+nu))
 
-    eps11 = 0.0
-    eps22 = 1.0e-2
+    eps22 = 0.0
+    eps11 = 1.0e-2
     eps12 = 0.0
 
     results = []
@@ -52,13 +52,19 @@ class experiment:
     def __init__(self, E=None, nu=None, no_values=6,for_chi=0):
         result = calculate_stiffness_conts(E, nu, no_values)[for_chi]
         chi, C11, C12, C11_mod = result[0], result[4], result[6], result[7]
+        self.chi = chi
+        self.E = 1
+        self.nu = 1
         if E is None:
             E = 210 * 10**3
+            self.E = E
+           
         if nu is None:
             nu = 0.3
+            self.nu = nu
         C44 = E / (2.0 * (1.0 + nu))
         self.stiffness = [
-            [C11_mod, C12, C12, 0.0, 0.0, 0.0],
+            [C11 + chi/10, C12, C12, 0.0, 0.0, 0.0],
             [C12, C11, C12, 0.0, 0.0, 0.0],
             [C12, C12, C11, 0.0, 0.0, 0.0],
             [0.0, 0.0, 0.0, C44, 0.0, 0.0],
@@ -160,6 +166,29 @@ class experiment:
             """ Rotate teh stiffness tensor by an angle, angle is given in dgerees """
             a = angle * pi/180
             return self.rotate(a)
+
+    def analytical_plane_stress(self):
+        C11 = self.get_component(1,1)
+        C22 = self.get_component(2,2)
+        C12 = self.get_component(1,2)
+        C66 = self.get_component(6,6)
+        C26 = self.get_component(2,6)
+        C16 = self.get_component(1,6)
+        c_eff = C11-(C12**2 * C66 - 2*C12*C16*C26 + C16**2*C22)/(C22*C66 - C16**2)
+        return c_eff * 0.01
+
+    def analytical_plane_stress_angle(self,angle):
+        C11 = self.get_component(1,1)*
+        C22 = self.get_component(2,2)
+        C12 = self.get_component(1,2)
+        C66 = self.get_component(6,6)
+        C26 = self.get_component(2,6)
+        C16 = self.get_component(1,6)
+        c_eff = C11-(C12**2 * C66 - 2*C12*C16*C26 + C16**2*C22)/(C22*C66 - C16**2)
+        return c_eff * 0.01
+
+    
+
             
    
 
@@ -198,17 +227,23 @@ def calculate_renard_series(ratio=None, series=None, decimal_places=2, no_values
         for i in range(no_values + 1)
     ]
 
+
+
 if __name__ == '__main__':
     Experiment = experiment(for_chi=0)
     component = Experiment.get_component(i=1,j=1)
     stiffness = Experiment.stiffness
     Experiment.set_strain_component(1,1,1e-2)
     Experiment.calc_stress_components()
-    stress11 =  Experiment.get_stress_component(1,1)
-    print(f"stress 11 {stress11}")
-    # print([round(i[0]) for i in calculate_stiffness_conts()])
+    Experiment.rotate(pi/4)
+    stress11_ana = Experiment.analytical_plane_stress()
+    print(f"stress_ana {stress11_ana}")
+       
+        
+    #print([round(i[0]) for i in calculate_stiffness_conts()])
+    #print([round(i[1]) for i in calculate_stiffness_conts()])
     # print([i[8] for i in calculate_stiffness_conts()])
-    # print([round(i[4]) for i in calculate_stiffness_conts()])
+    #print([round(i[4] + i[0]) for i in calculate_stiffness_conts()])
     # print([round(i[7]) for i in calculate_stiffness_conts()])
 
     #     print("\n-----------------------------")

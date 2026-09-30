@@ -436,8 +436,8 @@ def main():
     outdir = Path(args.outdir) if args.outdir else infile.parent
     outdir.mkdir(parents=True, exist_ok=True)
 
-    outfile = outdir / f"{infile.stem}_polar.png"
-    outfile_cont = outdir / f"{infile.stem}_con_polar.png"
+    outfile = outdir / f"{infile.stem}_polar.svg"
+    outfile_cont = outdir / f"{infile.stem}_con_polar.svg"
     
 
     plt.savefig(
