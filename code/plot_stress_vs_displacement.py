@@ -5,9 +5,9 @@ plot_stress.py
 Produces plots labeled with chi and anisotropy-angle values for that run.
 
 Usage:
-  
+
     python3 plot_stress.py --stressfile STRESS.txt --displacementfile displacement.txt --chi CHI --angle ANGLE --component COMP [--outdir DIR] [--show]
- 
+
 Example:
     python3 plot_stress.py --stressfile stress.txt --displacementfile displacement.txt --chi 2.5 --angle 0 --component 11
     python3 plot_stress.py --infile stress11_frame3of3.dat --chi 2.5 --angle 45
@@ -22,6 +22,10 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")  # safe default for headless/batch runs; --show still works
 import matplotlib.pyplot as plt
+
+plt.rcParams.update({
+    "text.usetex": False,
+})
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Plot stress data from .dat or .vtk files.")
@@ -106,11 +110,8 @@ def plot_stress_vs_displacement_files(stress_path, disp_path, outdir, chi, angle
 
     plt.figure()
     plt.plot(disp_vals, stress_vals, marker='o', linestyle='-')
-    plt.xlabel('Displacement (boxaverage last column)')
-    plt.ylabel('Stress')
-    title_comp = f" {comp_tag}" if component else ""
-    plt.title(f"Stress vs Displacement{title_comp} — chi={chi_str}, angle={angle_str}")
-    plt.grid(True)
+    plt.xlabel(r"$\bar{u}$")
+    plt.ylabel(rf"$\sigma_{{{component}}}$" if component else r"$\sigma$")
     plt.tight_layout()
     plt.savefig(str(out_path), dpi=150)
     plt.close()
@@ -136,4 +137,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

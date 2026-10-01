@@ -7,6 +7,10 @@ import re
 import sys
 from scipy.interpolate import griddata
 
+plt.rcParams.update({
+    "text.usetex": False,
+})
+
 
 try:
     import vtk
@@ -19,15 +23,15 @@ except ImportError:
 def fix_vtk_scalars_header(vtk_file_path):
     """
     Fix malformed VTK SCALARS declaration by adding the scalar name.
-    
+
     Some VTK generators (e.g., data2vtk) produce incomplete SCALARS lines:
         SCALARS float 1
-    
+
     This should be:
         SCALARS stress<component> float 1
-    
+
     This function reads the VTK file, fixes the header, and writes it back.
-    
+
     Args:
         vtk_file_path: Path to the VTK file
         component: Component name to add (e.g., '11', '22', '21')
@@ -35,7 +39,7 @@ def fix_vtk_scalars_header(vtk_file_path):
     try:
         with open(vtk_file_path, 'r', encoding='utf-8', errors='ignore') as f:
             lines = f.readlines()
-        
+
         # Look for malformed SCALARS line
         modified = False
         for i, line in enumerate(lines):
@@ -51,11 +55,11 @@ def fix_vtk_scalars_header(vtk_file_path):
                     lines[i] = new_line
                     modified = True
                     print(f"Fixed SCALARS header: added name '{scalar_name}'", file=sys.stderr)
-        
+
         if modified:
             with open(vtk_file_path, 'w', encoding='utf-8') as f:
                 f.writelines(lines)
-    
+
     except Exception as e:
         print(f"Warning: Could not fix VTK header: {e}", file=sys.stderr)
 
@@ -63,11 +67,11 @@ def fix_vtk_scalars_header(vtk_file_path):
 def read_vtk_scalar_data(vtk_file_path, component=None):
     """
     Read scalar data from a VTK file.
-    
+
     Args:
         vtk_file_path: Path to the VTK file
         component: Optional component name to filter (e.g., 'stress11')
-    
+
     Returns:
         Tuple of (x_values, stress_values) as numpy arrays
         or None if data cannot be extracted
@@ -75,28 +79,28 @@ def read_vtk_scalar_data(vtk_file_path, component=None):
     if not HAS_VTK:
         print("Error: VTK support not available. Install python package: vtk", file=sys.stderr)
         return None
-    
+
     # Fix any malformed SCALARS headers before reading
     fix_vtk_scalars_header(vtk_file_path)
-    
+
     try:
         reader = vtkStructuredPointsReader()
         reader.SetFileName(str(vtk_file_path))
         reader.ReadAllVectorsOn()
         reader.ReadAllScalarsOn()
         reader.Update()
-        
+
         output = reader.GetOutput()
         if output.GetNumberOfCells() == 0 and output.GetNumberOfPoints() == 0:
             print(f"Error: VTK file is empty: {vtk_file_path}", file=sys.stderr)
             return None
-        
+
         # Try to find the stress array
         point_data = output.GetPointData()
         if point_data.GetNumberOfArrays() == 0:
             print(f"Warning: No arrays found in VTK file: {vtk_file_path}", file=sys.stderr)
             return None
-        
+
         # Look for array matching the component
         stress_array = None
         if component:
@@ -107,15 +111,15 @@ def read_vtk_scalar_data(vtk_file_path, component=None):
                 if component in name.lower():
                     stress_array = arr
                     break
-        
+
         # Fallback: use first scalar array
         if stress_array is None:
             stress_array = point_data.GetArray(0)
-        
+
         if stress_array is None:
             print(f"Error: Could not extract stress data from {vtk_file_path}", file=sys.stderr)
             return None
-        
+
         # Convert to numpy array
         stress_data = numpy_support.vtk_to_numpy(stress_array)
         print("stress data to be plotted")
@@ -126,7 +130,7 @@ def read_vtk_scalar_data(vtk_file_path, component=None):
         dims = output.GetDimensions()
         spacing = output.GetSpacing()
         origin = output.GetOrigin()
-        
+
         # Generate X coordinates based on grid spacing
         # dims are (nx, ny, nz), spacing is (dx, dy, dz)
         nx = dims[0]
@@ -136,22 +140,22 @@ def read_vtk_scalar_data(vtk_file_path, component=None):
         print(" \n x values")
         print(x_values)
         stress_values = stress_data if stress_data.ndim == 1 else stress_data[:, 0]
-        
+
         # Ensure arrays have matching lengths
         if len(x_values) != len(stress_values):
             print(f"Warning: X coordinates ({len(x_values)}) don't match stress data ({len(stress_values)}). "
                   f"Using indices as X-axis.", file=sys.stderr)
             x_values = np.arange(len(stress_values))
-        
+
         return x_values, stress_values
-        
+
     except Exception as e:
         print(f"Error reading VTK file: {e}", file=sys.stderr)
         return None
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Plot stress data from .dat or .vtk files.")
-    parser.add_argument("--infile", required=True, 
+    parser.add_argument("--infile", required=True,
                         help="Path to the stress file (.dat or .vtk)")
     parser.add_argument("--chi", default=None,
                         help="chi value for this run")
@@ -323,13 +327,8 @@ def plot_polar_contours(force, nx, ny, origin, spacing, outfile, chi, angle):
 
     ax.set_thetamin(0)
     ax.set_thetamax(90)
-    
+    ax.grid(False)
 
-
-    title = "Driving Force Contours"
-    if chi is not None and angle is not None:
-        title += f" - chi={chi}, angle={angle}"
-    ax.set_title(title)
 
     plt.savefig(
         outfile,
@@ -337,7 +336,7 @@ def plot_polar_contours(force, nx, ny, origin, spacing, outfile, chi, angle):
         bbox_inches="tight"
     )
 
-   
+
 
 def main():
     args = parse_args()
@@ -358,7 +357,7 @@ def main():
 
     nx, ny, force, origin, spacing = extraction
 
-   
+
 
     # ---------------------------------------------------------
     # Construct the Cartesian mesh
@@ -412,11 +411,7 @@ def main():
     )
 
     cbar.set_label("Force magnitude")
-
-    title = "Driving Force"
-    if args.chi is not None and args.angle is not None:
-        title += f" - chi={args.chi}, angle={args.angle}"
-    ax.set_title(title)
+    ax.grid(False)
 
     # Put 0 degrees at the top
     #ax.set_theta_zero_location("N")
@@ -438,7 +433,7 @@ def main():
 
     outfile = outdir / f"{infile.stem}_polar.png"
     outfile_cont = outdir / f"{infile.stem}_con_polar.png"
-    
+
 
     plt.savefig(
         outfile,

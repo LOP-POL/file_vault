@@ -117,7 +117,7 @@ def main():
     for xi, yi in zip(chis,stresses):
         plt.text(xi, yi, str(yi), ha='center', va='bottom')
     plt.xlabel(r"$\chi$ GPa")
-    plt.ylabel('Stress22 (final boxaverage value)')
+    plt.ylabel(r"$\sigma_{22}$ GPa")
     fname = outdir / f"stress22_vs_chi_angle_{args.angle}.png"
     plt.tight_layout()
     plt.savefig(str(fname), dpi=300)

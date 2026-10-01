@@ -19,6 +19,10 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+plt.rcParams.update({
+    "text.usetex": False,
+})
+
 
 def read_last_column(txt_file_path):
     try:
@@ -68,20 +72,18 @@ def plot_mode_angle(parent_dir, angle, outdir):
         if s is None or d is None:
             continue
         n = min(len(s), len(d))
-        plt.plot(d[:n], s[:n], label=f"chi={chi}")
+        plt.plot(d[:n], s[:n], label=rf"$\chi={chi}$")
 
-    plt.xlabel('Displacement')
-    plt.ylabel('Stress')
-    plt.title(f"Stress vs Displacement — angle={angle}")
+    plt.xlabel(r"$\bar{u}$")
+    plt.ylabel(r"$\sigma_{22}$")
     plt.legend()
-    plt.grid(True)
     outdir = Path(outdir) if outdir else Path(parent_dir)
     outdir.mkdir(parents=True, exist_ok=True)
     fname = outdir / f"stress22_vs_disp_angle_{angle}.png"
     plt.tight_layout()
     plt.savefig(str(fname), dpi=150)
     print(f"Saved: {fname}")
-   
+
 
 
     plt.figure()
@@ -97,13 +99,11 @@ def plot_mode_angle(parent_dir, angle, outdir):
         if s11 is None or d11 is None:
             continue
         n = min(len(s11), len(d11))
-        plt.plot(d11[:n], s11[:n], label=f"chi={chi}")
+        plt.plot(d11[:n], s11[:n], label=rf"$\chi={chi}$")
 
-    plt.xlabel('Displacement')
-    plt.ylabel('Stress')
-    plt.title(f"Stress vs Displacement — angle={angle}")
+    plt.xlabel(r"$\bar{u}$")
+    plt.ylabel(r"$\sigma_{11}$")
     plt.legend()
-    plt.grid(True)
     outdir = Path(outdir) if outdir else Path(parent_dir)
     outdir.mkdir(parents=True, exist_ok=True)
     fname = outdir / f"stress11_vs_disp_angle_{angle}.png"
@@ -133,20 +133,18 @@ def plot_mode_chi(parent_dir, chi, outdir):
         if s is None or d is None:
             continue
         n = min(len(s), len(d))
-        plt.plot(d[:n], s[:n], label=f"angle={angle}")
+        plt.plot(d[:n], s[:n], label=rf"$\theta={angle}^\circ$")
 
-    plt.xlabel('Displacement')
-    plt.ylabel('Stress')
-    plt.title(f"Stress vs Displacement — chi={chi}")
+    plt.xlabel(r"$\bar{u}$")
+    plt.ylabel(r"$\sigma_{22}$")
     plt.legend()
-    plt.grid(True)
     outdir = Path(outdir) if outdir else Path(parent_dir)
     outdir.mkdir(parents=True, exist_ok=True)
     fname = outdir / f"stress_vs_disp_chi_{chi}.png"
     plt.tight_layout()
     plt.savefig(str(fname), dpi=150)
     print(f"Saved: {fname}")
-  
+
 
     plt.figure()
     for angle, folder in selected:
@@ -161,13 +159,11 @@ def plot_mode_chi(parent_dir, chi, outdir):
         if s11 is None or d11 is None:
             continue
         n = min(len(s11), len(d11))
-        plt.plot(d11[:n], s11[:n], label=f"angle={angle}")
-    
-    plt.xlabel('Displacement')
-    plt.ylabel('Stress')
-    plt.title(f"Stress vs Displacement — chi={chi}")
+        plt.plot(d11[:n], s11[:n], label=rf"$\theta={angle}^\circ$")
+
+    plt.xlabel(r"$\bar{u}$")
+    plt.ylabel(r"$\sigma_{11}$")
     plt.legend()
-    plt.grid(True)
     outdir = Path(outdir) if outdir else Path(parent_dir)
     outdir.mkdir(parents=True, exist_ok=True)
     fname = outdir / f"stress_vs_disp_chi_{chi}.png"
