@@ -1,4 +1,4 @@
-from math import log, pi
+from math import log, pi, cos, sin
 def calculate_stiffness_conts(E=None,nu=None,no_values=5):
 
     if E is None:
@@ -23,7 +23,7 @@ def calculate_stiffness_conts(E=None,nu=None,no_values=5):
         C11_mod = C11 + chi
 
         C26 = 0.0
-        C16 = 0.0 
+        C16 = 0.0
 
         sigma11 = (C11*eps11 + C12*eps22 + 2* C26*eps12)
 
@@ -44,32 +44,36 @@ def calculate_stiffness_conts(E=None,nu=None,no_values=5):
             C11_mod,
             increment,
         ])
-        increment += 0.2
+        increment += 0.02
     return results
 class experiment:
     """An elastic stiffness tensor represented in 6x6 Voigt notation."""
 
-    def __init__(self, E=None, nu=None, no_values=6,for_chi=0):
+    def __init__(self, E=None, nu=None, no_values=6, for_chi=0, chi=None):
         result = calculate_stiffness_conts(E, nu, no_values)[for_chi]
-        chi, C11, C12, C11_mod = result[0], result[4], result[6], result[7]
+        self.chi = result[0] if chi is None else float(chi)
+        self.C11, self.C12, self.C11_mod = result[4], result[6], result[7]
+
         if E is None:
             E = 210 * 10**3
         if nu is None:
             nu = 0.3
-        C44 = E / (2.0 * (1.0 + nu))
+        self.lambda_ = E*nu/((1.0+nu)*(1.0-2.0*nu))
+        self.mu = E/(2.0*(1.0+nu))
+        self.C44 = E / (2.0 * (1.0 + nu))
         self.stiffness = [
-            [C11_mod, C12, C12, 0.0, 0.0, 0.0],
-            [C12, C11, C12, 0.0, 0.0, 0.0],
-            [C12, C12, C11, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, C44, 0.0, 0.0],
-            [0.0, 0.0, 0.0, 0.0, C44, 0.0],
-            [0.0, 0.0, 0.0, 0.0, 0.0, C44],
+            [self.C11_mod, self.C12, self.C12, 0.0, 0.0, 0.0],
+            [self.C12, self.C11, self.C12, 0.0, 0.0, 0.0],
+            [self.C12, self.C12, self.C11, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, self.C44, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, self.C44, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, self.C44],
         ]
 
         self.compliance = [[[[0.0] * 3 for _ in range(3)] for _ in range(3)] for _ in range(3)] # creating a fourth order tensor with zeros
         self.strain = [[0.0]*3 for _ in range(3)]
         self.stress = [[0.0]*3 for _ in range(3)]
-        
+
 
     #TODO: calculate the compliance of teh stiffness tensor sostrain can be got from stress.
     def calculate_compliance(self):
@@ -85,14 +89,14 @@ class experiment:
         """Return a component using 1-based Voigt notation. for strain"""
         if not (1 <= i <= 3 and 1 <= j <= 3):
             raise IndexError("Voigt indices must be between 1 and 3")
-        return self.strain[i-i][i-j]   
+        return self.strain[i-i][i-j]
 
     def get_stress_component(self, i,j):
         """Return a component using 1-based Voigt notation. for stress"""
         if not (1 <= i <= 3 and 1 <= j <= 3):
             raise IndexError("Voigt indices must be between 1 and 3")
-        return self.stress[i-i][i-j]   
-    
+        return self.stress[i-i][i-j]
+
 
     def set_strain_component(self,i,j,value):
         self.strain[i-1][j-1] = value
@@ -101,10 +105,10 @@ class experiment:
         self.stress[i-1][j-1] = value
 
     # mutations
-    # TODO: make a strain component calculator thatw ill take the compliance of the stiffness matrix 
-    # and use the stress to do a dot product of the two to make a stiffness tensor 
+    # TODO: make a strain component calculator thatw ill take the compliance of the stiffness matrix
+    # and use the stress to do a dot product of the two to make a stiffness tensor
     def calc_strain_components(self):
-        
+
         return
     """Ony implemented for 2D stiffness as of now"""
     def calc_stress_components(self):
@@ -126,7 +130,7 @@ class experiment:
             [stress_voigt[4], stress_voigt[3], stress_voigt[2]],
         ]
         return self.stress
-    
+
     def rotate(self, angle):
         """Rotate the stiffness tensor about the z axis by ``angle`` radians."""
         from math import cos, sin
@@ -152,7 +156,7 @@ class experiment:
                     Q[i][p] * Q[j][q] * Q[k][r] * Q[l][t] * tensor[p][q][r][t] # the tensor with the copied stiffness entries are then rotated using the standard method
                     for p in range(3) for q in range(3)
                     for r in range(3) for t in range(3)
-                ) 
+                )
         self.stiffness = rotated
         return rotated
 
@@ -160,9 +164,25 @@ class experiment:
             """ Rotate teh stiffness tensor by an angle, angle is given in dgerees """
             a = angle * pi/180
             return self.rotate(a)
-            
-   
 
+
+    def analytical(self, angle):
+        """Return analytical sigma_11 for the current epsilon_11 and angle in degrees."""
+        angle = angle * pi/180
+        c, s = cos(angle), sin(angle)
+        c_squared = c * c
+        s_squared = s * s
+        C11 = self.lambda_ + 2.0 * self.mu + self.chi * c_squared**2
+        C12 = self.lambda_ + self.chi * c_squared * s_squared
+        C16 = self.chi * c**3 * s
+        C22 = self.lambda_ + 2.0 * self.mu + self.chi * s_squared**2
+        C26 = self.chi * c * s**3
+        C66 = self.mu + self.chi * c_squared * s_squared
+
+        effective_stiffness = C11 - (
+            C12**2 * C66 - 2.0 * C12 * C16 * C26 + C16**2 * C22
+        ) / (C22 * C66 - C26**2)
+        return effective_stiffness * self.strain[0][0]
 
 def degrees_to_radians(angle):
     return angle * pi/180
@@ -199,20 +219,22 @@ def calculate_renard_series(ratio=None, series=None, decimal_places=2, no_values
     ]
 
 if __name__ == '__main__':
-    Experiment = experiment(for_chi=0)
+    Experiment = experiment(for_chi=1)
     component = Experiment.get_component(i=1,j=1)
-    stiffness = Experiment.stiffness
+
     Experiment.set_strain_component(1,1,1e-2)
     Experiment.calc_stress_components()
+
     stress11 =  Experiment.get_stress_component(1,1)
+    stiffness = Experiment.stiffness
+
     print(f"stress 11 {stress11}")
+    print(f"analytical stress 11 {Experiment.analytical(angle=60)}")
     # print([round(i[0]) for i in calculate_stiffness_conts()])
     # print([i[8] for i in calculate_stiffness_conts()])
     # print([round(i[4]) for i in calculate_stiffness_conts()])
     # print([round(i[7]) for i in calculate_stiffness_conts()])
-    print(f'component11: {component}')
-    print(f"stiffness {stiffness}")
-    
+
 
     #     print("\n-----------------------------")
     #     print(f'chi value: {result[0]} \n')
@@ -225,5 +247,3 @@ if __name__ == '__main__':
     #     print(f'C11_mod value: {round(result[7],2)} \n')
     #     print(f'step value: {round(result[8],2)} \n')
     #     print(f"renard series : {calculate_renard_series(ratio=3, step=2, decimal_places=4)}")
-
-    

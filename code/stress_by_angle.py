@@ -8,7 +8,7 @@ Usage:
     python3 stress_by_angle.py --parent_dir /path/to/results --chi 0.5 --outdir /path/to/plots
 
 The script looks for folders named like:
-  transversely_iso_no_crack_chi_<CHI>_angle_<ANGLE>_... 
+  transversely_iso_no_crack_chi_<CHI>_angle_<ANGLE>_...
 and expects the get_data.sh script to have produced:
   <folder>/domain_cut_analysis/<FOLDER_NAME>_stress22_boxavg.txt
   <folder>/domain_cut_analysis/<FOLDER_NAME>_stress11_boxavg.txt
@@ -23,6 +23,11 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from analytical_calc import experiment
+
+plt.rcParams.update({
+    "text.usetex": False,
+})
 
 
 def read_last_column(txt_file_path):
@@ -112,27 +117,37 @@ def main():
     plt.plot(angles, stresses, marker='o', linestyle='-',)
     for xi, yi in zip(angles, stresses):
         plt.text(xi, yi, str(yi), ha='center', va='bottom')
-    plt.xlabel('angle')
-    plt.ylabel('Stress22 (final boxaverage value)')
-    plt.title(f"Stress22 vs angle — chi={args.chi}")
-    plt.grid(True)
+    plt.xlabel(r"$\theta^\circ$ ")
+    plt.ylabel(r"$\sigma_{22}$ GPa")
     fname = outdir / f"stress22_vs_angle_chi_{args.chi}.png"
     plt.tight_layout()
-    plt.savefig(str(fname), dpi=150)
+    plt.savefig(str(fname), dpi=300)
     print(f"Saved: {fname}")
 
     plt.figure()
     plt.plot(angles11, stresses11, marker='o', linestyle='-')
     for xi, yi in zip(angles11, stresses11):
         plt.text(xi, yi, str(yi), ha='center', va='bottom')
-    plt.xlabel('angle')
-    plt.ylabel('Stress11 (final boxaverage value)')
-    plt.title(f"Stress11 vs angle — chi={args.chi}")
-    plt.grid(True)
+    plt.xlabel(r"$\theta^\circ$")
+    plt.ylabel(r"$\sigma_{11}$ GPa")
     fname11 = outdir / f"stress11_vs_angle_chi_{args.chi}.png"
     plt.tight_layout()
-    plt.savefig(str(fname11), dpi=150)
+    plt.savefig(str(fname11), dpi=300)
     print(f"Saved: {fname11}")
+
+    analytical_model = experiment(chi=float(args.chi))
+    analytical_model.set_strain_component(1, 1, 1e-2)
+    analytical_stresses11 = [
+        analytical_model.analytical(angle) for angle, _ in folders
+    ]
+    plt.figure()
+    plt.plot([angle for angle, _ in folders], analytical_stresses11, marker='o', linestyle='-')
+    plt.xlabel(r"$\theta^\circ$")
+    plt.ylabel(r"$\sigma_{11}$ GPa")
+    analytical_fname = outdir / f"stress11_vs_angle_chi_{args.chi}_ana.png"
+    plt.tight_layout()
+    plt.savefig(str(analytical_fname), dpi=300)
+    print(f"Saved: {analytical_fname}")
 
 
 if __name__ == '__main__':
