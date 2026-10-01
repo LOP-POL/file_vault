@@ -101,12 +101,16 @@ def plot_stress_vs_displacement_files(stress_path, disp_path, outdir, chi, angle
     outdir.mkdir(parents=True, exist_ok=True)
 
     comp_tag = f"stress{component}" if component else "stress"
-    out_name = f"{comp_tag}_vs_disp_chi_{chi_str}_angle_{angle_str}.svg"
+    out_name = f"{comp_tag}_vs_disp_chi_{chi_str}_angle_{angle_str}.png"
     out_path = outdir / out_name
 
     plt.figure()
     plt.plot(disp_vals, stress_vals, marker='o', linestyle='-')
-   
+    plt.xlabel('Displacement (boxaverage last column)')
+    plt.ylabel('Stress')
+    title_comp = f" {comp_tag}" if component else ""
+    plt.title(f"Stress vs Displacement{title_comp} — chi={chi_str}, angle={angle_str}")
+    plt.grid(True)
     plt.tight_layout()
     plt.savefig(str(out_path), dpi=150)
     plt.close()

@@ -336,7 +336,7 @@ def plot_stress_vs_displacement_files(stress_path, disp_path, outdir, chi, angle
     outdir.mkdir(parents=True, exist_ok=True)
 
     comp_tag = f"stress{component}" if component else "stress"
-    out_name = f"{comp_tag}_vs_disp_chi_{chi_str}_angle_{angle_str}.svg"
+    out_name = f"{comp_tag}_vs_disp_chi_{chi_str}_angle_{angle_str}.png"
     out_path = outdir / out_name
 
     plt.figure()
@@ -345,6 +345,8 @@ def plot_stress_vs_displacement_files(stress_path, disp_path, outdir, chi, angle
     plt.ylabel('Stress')
     title_comp = f" {comp_tag}" if component else ""
     plt.title(f"Stress_{comp_tag} vs Displacement{title_comp} — chi={chi_str}, angle={angle_str}")
+    plt.grid(True)
+    plt.tight_layout()
     plt.savefig(str(out_path), dpi=150)
     plt.close()
     print(f"Saved stress vs displacement plot: {out_path}")
@@ -362,7 +364,7 @@ def visulize_whole_field(outdir,infile_parent,angle_str,chi_str,stress, componen
     outdir.mkdir(parents=True, exist_ok=True)
     
     comp_tag = f"stress{component}" if component else "stress"
-    out_name = f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_field.svg"
+    out_name = f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_field.png"
     out_path = outdir / out_name
     plt.savefig(str(out_path), dpi=150)
     print(f"Saved plot to: {out_path}")
@@ -377,7 +379,7 @@ def plot_stress_vs_x_fixed_y(x,stress,y_index,infile_parent,component,chi_str,an
     outdir.mkdir(parents=True, exist_ok=True)
     
     comp_tag = f"stress{component}" if component else "stress"
-    out_name = f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_x_fixed_y{y_index}.svg"
+    out_name = f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_x_fixed_y{y_index}.png"
     out_path = outdir / out_name
     plt.savefig(str(out_path), dpi=150)
     print(f"Saved plot to: {out_path}")
@@ -392,7 +394,7 @@ def plot_stress_vs_y_fixed_x(y,stress,x_index,infile_parent,component,chi_str,an
     outdir.mkdir(parents=True, exist_ok=True)
     
     comp_tag = f"stress{component}" if component else "stress"
-    out_name = f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_y_fixed_x{x_index}.svg"
+    out_name = f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_y_fixed_x{x_index}.png"
     out_path = outdir / out_name
     plt.savefig(str(out_path), dpi=150)
     print(f"Saved plot to: {out_path}")

@@ -23,7 +23,6 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from analytical_calc import experiment
 
 
 def read_last_column(txt_file_path):
@@ -113,10 +112,11 @@ def main():
     plt.plot(angles, stresses, marker='o', linestyle='-',)
     for xi, yi in zip(angles, stresses):
         plt.text(xi, yi, str(yi), ha='center', va='bottom')
-
-  
-
-    fname = outdir / f"stress22_vs_angle_chi_{args.chi}.svg"
+    plt.xlabel('angle')
+    plt.ylabel('Stress22 (final boxaverage value)')
+    plt.title(f"Stress22 vs angle — chi={args.chi}")
+    plt.grid(True)
+    fname = outdir / f"stress22_vs_angle_chi_{args.chi}.png"
     plt.tight_layout()
     plt.savefig(str(fname), dpi=150)
     print(f"Saved: {fname}")
@@ -125,23 +125,13 @@ def main():
     plt.plot(angles11, stresses11, marker='o', linestyle='-')
     for xi, yi in zip(angles11, stresses11):
         plt.text(xi, yi, str(yi), ha='center', va='bottom')
-   
-    fname11 = outdir / f"stress11_vs_angle_chi_{args.chi}.svg"
+    plt.xlabel('angle')
+    plt.ylabel('Stress11 (final boxaverage value)')
+    plt.title(f"Stress11 vs angle — chi={args.chi}")
+    plt.grid(True)
+    fname11 = outdir / f"stress11_vs_angle_chi_{args.chi}.png"
     plt.tight_layout()
-    plt.savefig(str(fname11), dpi=150 )
-    print(f"Saved: {fname11}")
-
-    plt.figure
-    y_data = []
-    for _ in range(6):
-        y_data.append(experiment(for_chi=int(args.chi)-1).analytical_plane_stress())
-        plt.plot(angles11, stresses11, marker='o', linestyle='-')
-    for xi, yi in zip(angles11, y_data):
-        plt.text(xi, yi, str(yi), ha='center', va='bottom')
-
-    fname11 = outdir / f"stress11_vs_angle_chi_ana{args.chi}.svg"
-    plt.tight_layout()
-    plt.savefig(str(fname11), dpi=150 )
+    plt.savefig(str(fname11), dpi=150)
     print(f"Saved: {fname11}")
 
 
