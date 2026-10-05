@@ -25,10 +25,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from analytical_calc import experiment
 from math import floor
+import thesis_style as ts
 
-plt.rcParams.update({
-    "text.usetex": False,
-})
+ts.apply()
 
 
 def read_last_column(txt_file_path):
@@ -115,12 +114,11 @@ def main():
     outdir.mkdir(parents=True, exist_ok=True)
 
     plt.figure()
-    plt.plot(angles, stresses, marker='o', linestyle='-',)
-    for xi, yi in zip(angles, stresses):
-        plt.text(xi, yi, str(yi), ha='center', va='bottom')
+    plt.plot(angles, stresses, marker='o', linestyle='-', label="numerical")
     plt.xlabel(r"$\theta^\circ$ ")
     plt.ylabel(r"$\sigma_{22}$ [GPa]")
     fname = outdir / f"stress22_vs_angle_chi_{args.chi}.png"
+    plt.legend()
     plt.tight_layout()
     plt.savefig(str(fname), dpi=300)
     print(f"Saved: {fname}")
@@ -134,24 +132,24 @@ def main():
 
     plt.figure()
     plt.plot(angles11, stresses11, marker='o', label="numerical")
-    plt.plot([angle for angle, _ in folders], analytical_stresses11, marker='o', linestyle='-',label="analytical")
-    for xi, yi in zip(angles11, stresses11):
-        plt.text(xi, yi, str(yi), ha='center', va='bottom')
+    plt.plot([angle for angle, _ in folders], analytical_stresses11, linestyle='-',label="analytical")
     plt.xlabel(r"$\theta^\circ$")
     plt.ylabel(r"$\sigma_{11}$ [GPa]")
     fname11 = outdir / f"stress11_vs_angle_chi_{args.chi}.png"
+    plt.legend()
     plt.tight_layout()
     plt.savefig(str(fname11), dpi=300)
     print(f"Saved: {fname11}")
 
    
     plt.figure()
-    plt.plot([angle for angle, _ in folders], analytical_stresses11, marker='o', linestyle='-')
+    plt.plot([angle for angle, _ in folders], analytical_stresses11, marker='o', linestyle='-',label="analytical")
     for xi, yi in zip(angles11, analytical_stresses11):
             plt.text(xi, yi, str(yi), ha='center', va='bottom')
     plt.xlabel(r"$\theta^\circ$")
     plt.ylabel(r"$\sigma_{11}$ [GPa]")
     analytical_fname = outdir / f"stress11_vs_angle_chi_{args.chi}_ana.png"
+    plt.legend()
     plt.tight_layout()
     plt.savefig(str(analytical_fname), dpi=300)
     print(f"Saved: {analytical_fname}")
