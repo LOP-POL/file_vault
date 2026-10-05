@@ -63,7 +63,7 @@ def plot_mode_angle(parent_dir, angle, outdir):
     for chi, folder in selected:
         work = folder / 'domain_cut_analysis'
         stress_file = work / f"{folder.name}_stress22_boxavg.txt"
-        disp_file = work / f"{folder.name}_Uy_boxavg.txt"
+        disp_file = work / f"{folder.name}_Ux_boxavg.txt"
         if not stress_file.exists() or not disp_file.exists():
             print(f"Skipping {folder}: missing boxavg files", file=sys.stderr)
             continue
@@ -74,7 +74,7 @@ def plot_mode_angle(parent_dir, angle, outdir):
         n = min(len(s), len(d))
         plt.plot(d[:n], s[:n], label=rf"$\chi={chi}$")
 
-    plt.xlabel(r"$\bar{u}$")
+    plt.xlabel(r"$\bar{u}$mm")
     plt.ylabel(r"$\sigma_{22}$")
     plt.legend()
     outdir = Path(outdir) if outdir else Path(parent_dir)
@@ -90,7 +90,7 @@ def plot_mode_angle(parent_dir, angle, outdir):
     for chi, folder in selected:
         work = folder / 'domain_cut_analysis'
         stress_file = work / f"{folder.name}_stress11_boxavg.txt"
-        disp_file = work / f"{folder.name}_Uy_boxavg.txt"
+        disp_file = work / f"{folder.name}_Ux_boxavg.txt"
         if not stress_file.exists() or not disp_file.exists():
             print(f"Skipping {folder}: missing boxavg files", file=sys.stderr)
             continue
@@ -101,8 +101,8 @@ def plot_mode_angle(parent_dir, angle, outdir):
         n = min(len(s11), len(d11))
         plt.plot(d11[:n], s11[:n], label=rf"$\chi={chi}$")
 
-    plt.xlabel(r"$\bar{u}$")
-    plt.ylabel(r"$\sigma_{11}$")
+    plt.xlabel(r"$\bar{u}$mm")
+    plt.ylabel(r"$\sigma_{11}$GPa")
     plt.legend()
     outdir = Path(outdir) if outdir else Path(parent_dir)
     outdir.mkdir(parents=True, exist_ok=True)
@@ -124,7 +124,7 @@ def plot_mode_chi(parent_dir, chi, outdir):
     for angle, folder in selected:
         work = folder / 'domain_cut_analysis'
         stress_file = work / f"{folder.name}_stress22_boxavg.txt"
-        disp_file = work / f"{folder.name}_Uy_boxavg.txt"
+        disp_file = work / f"{folder.name}_Ux_boxavg.txt"
         if not stress_file.exists() or not disp_file.exists():
             print(f"Skipping {folder}: missing boxavg files", file=sys.stderr)
             continue
@@ -135,7 +135,7 @@ def plot_mode_chi(parent_dir, chi, outdir):
         n = min(len(s), len(d))
         plt.plot(d[:n], s[:n], label=rf"$\theta={angle}^\circ$")
 
-    plt.xlabel(r"$\bar{u}$")
+    plt.xlabel(r"$\bar{u}$mm")
     plt.ylabel(r"$\sigma_{22}$")
     plt.legend()
     outdir = Path(outdir) if outdir else Path(parent_dir)
@@ -150,7 +150,7 @@ def plot_mode_chi(parent_dir, chi, outdir):
     for angle, folder in selected:
         work = folder / 'domain_cut_analysis'
         stress_file = work / f"{folder.name}_stress11_boxavg.txt"
-        disp_file = work / f"{folder.name}_Uy_boxavg.txt"
+        disp_file = work / f"{folder.name}_Ux_boxavg.txt"
         if not stress_file.exists() or not disp_file.exists():
             print(f"Skipping {folder}: missing boxavg files", file=sys.stderr)
             continue
@@ -161,8 +161,8 @@ def plot_mode_chi(parent_dir, chi, outdir):
         n = min(len(s11), len(d11))
         plt.plot(d11[:n], s11[:n], label=rf"$\theta={angle}^\circ$")
 
-    plt.xlabel(r"$\bar{u}$")
-    plt.ylabel(r"$\sigma_{11}$")
+    plt.xlabel(r"$\bar{u}$mm")
+    plt.ylabel(r"$\sigma_{11}$GPa")
     plt.legend()
     outdir = Path(outdir) if outdir else Path(parent_dir)
     outdir.mkdir(parents=True, exist_ok=True)

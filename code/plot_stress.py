@@ -475,8 +475,8 @@ def main():
     outdir = Path(args.outdir) if args.outdir else infile.parent
     outdir.mkdir(parents=True, exist_ok=True)
 
-    visulize_whole_field(args.outdir, infile.parent,angle_str,chi_str,stress_man,component)
-    plot_stress_vs_x_fixed_y(x_values_man,stress_man,50,infile.parent,component,chi_str,angle_str, outdir)
+    visulize_whole_field(outdir, infile.parent,angle_str,chi_str,stress_man,component)
+    #plot_stress_vs_x_fixed_y(x_values_man,stress_man,50,infile.parent,component,chi_str,angle_str, outdir)
     #plot_stress_vs_y_fixed_x(y_values_man,stress_man,50,infile.parent,component,chi_str,angle_str, outdir)
 
     if args.show:

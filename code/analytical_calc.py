@@ -50,7 +50,7 @@ class experiment:
     """An elastic stiffness tensor represented in 6x6 Voigt notation."""
 
     def __init__(self, E=None, nu=None, no_values=6, for_chi=0, chi=None):
-        result = calculate_stiffness_conts(E, nu, no_values)[for_chi]
+        result = calculate_stiffness_conts(E, nu, no_values)[int(for_chi)]
         self.chi = result[0] if chi is None else float(chi)
         self.C11, self.C12, self.C11_mod = result[4], result[6], result[7]
 
@@ -219,7 +219,7 @@ def calculate_renard_series(ratio=None, series=None, decimal_places=2, no_values
     ]
 
 if __name__ == '__main__':
-    Experiment = experiment(for_chi=1)
+    Experiment = experiment(for_chi=5)
     component = Experiment.get_component(i=1,j=1)
 
     Experiment.set_strain_component(1,1,1e-2)
@@ -229,7 +229,7 @@ if __name__ == '__main__':
     stiffness = Experiment.stiffness
 
     print(f"stress 11 {stress11}")
-    print(f"analytical stress 11 {Experiment.analytical(angle=60)}")
+    print(f"analytical stress 11 {Experiment.analytical(angle=0)}")
     # print([round(i[0]) for i in calculate_stiffness_conts()])
     # print([i[8] for i in calculate_stiffness_conts()])
     # print([round(i[4]) for i in calculate_stiffness_conts()])

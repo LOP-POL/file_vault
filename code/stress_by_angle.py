@@ -24,6 +24,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from analytical_calc import experiment
+from math import floor
 
 plt.rcParams.update({
     "text.usetex": False,
@@ -135,13 +136,15 @@ def main():
     plt.savefig(str(fname11), dpi=300)
     print(f"Saved: {fname11}")
 
-    analytical_model = experiment(chi=float(args.chi))
+    analytical_model = experiment(for_chi=floor(int(args.chi)))
     analytical_model.set_strain_component(1, 1, 1e-2)
     analytical_stresses11 = [
-        analytical_model.analytical(angle) for angle, _ in folders
+        round(analytical_model.analytical(angle),3) for angle, _ in folders
     ]
     plt.figure()
     plt.plot([angle for angle, _ in folders], analytical_stresses11, marker='o', linestyle='-')
+    for xi, yi in zip(angles11, analytical_stresses11):
+            plt.text(xi, yi, str(yi), ha='center', va='bottom')
     plt.xlabel(r"$\theta^\circ$")
     plt.ylabel(r"$\sigma_{11}$ GPa")
     analytical_fname = outdir / f"stress11_vs_angle_chi_{args.chi}_ana.png"

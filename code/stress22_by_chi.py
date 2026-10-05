@@ -136,12 +136,14 @@ def main():
 
     analytical_stresses11 = []
     for chi, _ in folders:
-        analytical_model = experiment(chi=chi)
+        analytical_model = experiment(for_chi=chi)
         analytical_model.set_strain_component(1, 1, 1e-2)
-        analytical_stresses11.append(analytical_model.analytical(float(args.angle)))
+        analytical_stresses11.append(round(analytical_model.analytical(float(args.angle)),3))
 
     plt.figure()
     plt.plot([chi for chi, _ in folders], analytical_stresses11, marker='o', linestyle='-')
+    for xi, yi in zip(chis11,analytical_stresses11):
+        plt.text(xi, yi, str(yi), ha='center', va='bottom')
     plt.xlabel(r"$\chi$ GPa")
     plt.ylabel(r"$\sigma_{11}$ GPa")
     analytical_fname = outdir / f"stress11_vs_chi_angle_{args.angle}_ana.png"
