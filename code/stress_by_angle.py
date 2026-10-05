@@ -125,8 +125,16 @@ def main():
     plt.savefig(str(fname), dpi=300)
     print(f"Saved: {fname}")
 
+
+    analytical_model = experiment(for_chi=floor(int(args.chi)))
+    analytical_model.set_strain_component(1, 1, 1e-2)
+    analytical_stresses11 = [
+        round(analytical_model.analytical(angle),3) for angle, _ in folders
+    ]
+
     plt.figure()
-    plt.plot(angles11, stresses11, marker='o', linestyle='-')
+    plt.plot(angles11, stresses11, marker='o', label="numerical")
+    plt.plot([angle for angle, _ in folders], analytical_stresses11, marker='o', linestyle='-',label="analytical")
     for xi, yi in zip(angles11, stresses11):
         plt.text(xi, yi, str(yi), ha='center', va='bottom')
     plt.xlabel(r"$\theta^\circ$")
@@ -136,11 +144,7 @@ def main():
     plt.savefig(str(fname11), dpi=300)
     print(f"Saved: {fname11}")
 
-    analytical_model = experiment(for_chi=floor(int(args.chi)))
-    analytical_model.set_strain_component(1, 1, 1e-2)
-    analytical_stresses11 = [
-        round(analytical_model.analytical(angle),3) for angle, _ in folders
-    ]
+   
     plt.figure()
     plt.plot([angle for angle, _ in folders], analytical_stresses11, marker='o', linestyle='-')
     for xi, yi in zip(angles11, analytical_stresses11):

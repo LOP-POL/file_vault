@@ -23,6 +23,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from analytical_calc import experiment
+import thesis_style as ts
 
 plt.rcParams.update({
     "text.usetex": False,
@@ -71,6 +72,8 @@ def main():
     chis = []
     chis11 = []
     stresses = []
+    analytical_stresses11 = []
+    analytical_stresses11_side = []
 
     stresses11 = []
     for chi, folder in folders:
@@ -90,6 +93,9 @@ def main():
         stresses.append(val)
 
     for chi, folder in folders:
+        analytical_model = experiment(for_chi=chi)
+        analytical_model.set_strain_component(1, 1, 1e-2)
+        analytical_stresses11_side.append(round(analytical_model.analytical(float(args.angle)),3))
         work = folder / 'domain_cut_analysis'
         # boxavg filename pattern
         fname11 = f"{folder.name}_stress11_boxavg.txt"
@@ -113,20 +119,21 @@ def main():
     outdir.mkdir(parents=True, exist_ok=True)
 
     plt.figure()
-    plt.plot(chis, stresses, marker='o', linestyle='-',)
+    plt.plot(chis, stresses, marker='o',label="numerical")
+    plt.plot([chi for chi, _ in folders], analytical_stresses11_side, marker='o', linestyle='-',label="analytical")
     for xi, yi in zip(chis,stresses):
         plt.text(xi, yi, str(yi), ha='center', va='bottom')
     plt.xlabel(r"$\chi$ [GPa]")
     plt.ylabel(r"$\sigma_{22}$ [GPa]")
     fname = outdir / f"stress22_vs_chi_angle_{args.angle}.png"
     plt.tight_layout()
+    plt.legend()
     plt.savefig(str(fname), dpi=300)
     print(f"Saved: {fname}")
 
     plt.figure()
     plt.plot(chis11, stresses11, marker='o', linestyle='-')
-    for xi, yi in zip(chis11,stresses11):
-        plt.text(xi, yi, str(yi), ha='center', va='bottom')
+    plt.plot(chi)     
     plt.xlabel(r"$\chi$ [GPa]")
     plt.ylabel(r"$\sigma_{11}$ [GPa]")
     fname11 = outdir / f"stress11_vs_chi_angle_{args.angle}.png"
@@ -134,7 +141,7 @@ def main():
     plt.savefig(str(fname11), dpi=300)
     print(f"Saved: {fname11}")
 
-    analytical_stresses11 = []
+  
     for chi, _ in folders:
         analytical_model = experiment(for_chi=chi)
         analytical_model.set_strain_component(1, 1, 1e-2)
