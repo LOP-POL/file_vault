@@ -346,8 +346,8 @@ def plot_stress_vs_displacement_files(stress_path, disp_path, outdir, chi, angle
 
     fig, ax = plt.subplots(figsize=ts.figsize(WIDTH))
     ax.plot(disp_vals, stress_vals, marker='o', linestyle='-')
-    ax.set_xlabel(r"$\bar{u}$")
-    ax.set_ylabel(rf"$\sigma_{{{component}}}$" if component else r"$\sigma$")
+    ax.set_xlabel(r"$\bar{u}$ [mm]")
+    ax.set_ylabel(rf"$\sigma_{{{component}}}$ [GPa]" if component else r"$\sigma$ [GPa]")
     ts.save(fig, out_stem)
     plt.close(fig)
     return True
@@ -356,7 +356,7 @@ def visulize_whole_field(outdir,infile_parent,angle_str,chi_str,stress, componen
     ny, nx = stress.shape
     fig, ax = plt.subplots(figsize=ts.figsize(WIDTH, aspect=0.85 * ny / nx))
     im = ax.imshow(stress, origin='lower')
-    stress_label = rf"$\sigma_{{{component}}}$" if component else r"$\sigma$"
+    stress_label = rf"$\sigma_{{{component}}} GPa$" if component else r"$\sigma$"
     fig.colorbar(im, ax=ax, label=stress_label)
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"$y$")
@@ -380,7 +380,7 @@ def plot_stress_vs_y_fixed_x(y,stress,x_index,infile_parent,component,chi_str,an
     fig, ax = plt.subplots(figsize=ts.figsize(WIDTH))
     ax.plot(y, stress[:, x_index])
     ax.set_xlabel(r"$y$")
-    ax.set_ylabel(rf"$\sigma_{{{component}}}$" if component else r"$\sigma$")
+    ax.set_ylabel(rf"$\sigma_{{{component}}}$ GPa" if component else r"$\sigma$")
     outdir = Path(outdir) if outdir else infile_parent
     comp_tag = f"stress{component}" if component else "stress"
     ts.save(fig, outdir / f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_y_fixed_x{x_index}")

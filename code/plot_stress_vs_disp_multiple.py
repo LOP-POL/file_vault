@@ -66,7 +66,7 @@ def overlay_curves(curves, component, out_stem, width):
     for label, folder in curves:
         work = folder / 'domain_cut_analysis'
         stress_file = work / f"{folder.name}_stress{component}_boxavg.txt"
-        disp_file = work / f"{folder.name}_Uy_boxavg.txt"
+        disp_file = work / f"{folder.name}_Ux_boxavg.txt"
         if not stress_file.exists() or not disp_file.exists():
             print(f"Skipping {folder}: missing boxavg files", file=sys.stderr)
             continue
@@ -78,8 +78,8 @@ def overlay_curves(curves, component, out_stem, width):
         ax.plot(d[:n], s[:n], label=label)
         plotted += 1
 
-    ax.set_xlabel(r"$\bar{u}$")
-    ax.set_ylabel(rf"$\sigma_{{{component}}}$")
+    ax.set_xlabel(r"$\bar{u}$ [mm]")
+    ax.set_ylabel(rf"$\sigma_{{{component}}} [GPa]$")
     if plotted:
         ax.legend()
     ts.save(fig, out_stem)
@@ -93,7 +93,7 @@ def plot_mode_angle(parent_dir, angle, outdir, width):
         print(f"No runs for angle {angle}", file=sys.stderr)
         return False
     selected.sort(key=lambda x: x[0])
-    curves = [(rf"$\chi={chi}$", f) for chi, f in selected]
+    curves = [(rf"$\chi={chi}$ [GPa]", f) for chi, f in selected]
 
     outdir = Path(outdir) if outdir else Path(parent_dir)
     overlay_curves(curves, "22", outdir / f"stress22_vs_disp_angle_{angle}", width)

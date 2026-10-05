@@ -119,7 +119,7 @@ def main():
     for xi, yi in zip(angles, stresses):
         plt.text(xi, yi, str(yi), ha='center', va='bottom')
     plt.xlabel(r"$\theta^\circ$ ")
-    plt.ylabel(r"$\sigma_{22}$ GPa")
+    plt.ylabel(r"$\sigma_{22}$ [GPa]")
     fname = outdir / f"stress22_vs_angle_chi_{args.chi}.png"
     plt.tight_layout()
     plt.savefig(str(fname), dpi=300)
@@ -130,7 +130,7 @@ def main():
     for xi, yi in zip(angles11, stresses11):
         plt.text(xi, yi, str(yi), ha='center', va='bottom')
     plt.xlabel(r"$\theta^\circ$")
-    plt.ylabel(r"$\sigma_{11}$ GPa")
+    plt.ylabel(r"$\sigma_{11}$ [GPa]")
     fname11 = outdir / f"stress11_vs_angle_chi_{args.chi}.png"
     plt.tight_layout()
     plt.savefig(str(fname11), dpi=300)
@@ -146,7 +146,7 @@ def main():
     for xi, yi in zip(angles11, analytical_stresses11):
             plt.text(xi, yi, str(yi), ha='center', va='bottom')
     plt.xlabel(r"$\theta^\circ$")
-    plt.ylabel(r"$\sigma_{11}$ GPa")
+    plt.ylabel(r"$\sigma_{11}$ [GPa]")
     analytical_fname = outdir / f"stress11_vs_angle_chi_{args.chi}_ana.png"
     plt.tight_layout()
     plt.savefig(str(analytical_fname), dpi=300)

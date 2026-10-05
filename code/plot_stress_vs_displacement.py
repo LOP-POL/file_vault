@@ -110,8 +110,8 @@ def plot_stress_vs_displacement_files(stress_path, disp_path, outdir, chi, angle
 
     plt.figure()
     plt.plot(disp_vals, stress_vals, marker='o', linestyle='-')
-    plt.xlabel(r"$\bar{u}$")
-    plt.ylabel(rf"$\sigma_{{{component}}}$" if component else r"$\sigma$")
+    plt.xlabel(r"$\bar{u}$ [mm]")
+    plt.ylabel(rf"$\sigma_{{{component}}}$ [GPa]" if component else r"$\sigma$ [GPa]")
     plt.tight_layout()
     plt.savefig(str(out_path), dpi=150)
     plt.close()
