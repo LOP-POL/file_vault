@@ -30,9 +30,9 @@ import matplotlib
 matplotlib.use("Agg")  # safe default for headless/batch runs; --show still works
 import matplotlib.pyplot as plt
 
-plt.rcParams.update({
-    "text.usetex": False,
-})
+import thesis_style as ts
+
+ts.apply()
 
 # Optional VTK support
 try:
@@ -56,6 +56,8 @@ def parse_args():
                         help="Stress component identifier (e.g., '11', '22', '21') - auto-detected if not provided")
     parser.add_argument("--outdir", default=None,
                         help="Directory to save the plot in (default: same directory as --infile)")
+    parser.add_argument("--width", type=float, default=0.8,
+                        help="figure width as a fraction of the LaTeX text width (1.0 = full width, 0.48 = half). Default 0.8")
     parser.add_argument("--show", action="store_true",
                         help="Also display the plot interactively")
     # New: allow plotting stress vs displacement from two boxaverage output files
@@ -340,68 +342,58 @@ def plot_stress_vs_displacement_files(stress_path, disp_path, outdir, chi, angle
     outdir.mkdir(parents=True, exist_ok=True)
 
     comp_tag = f"stress{component}" if component else "stress"
-    out_name = f"{comp_tag}_vs_disp_chi_{chi_str}_angle_{angle_str}.png"
-    out_path = outdir / out_name
+    out_stem = outdir / f"{comp_tag}_vs_disp_chi_{chi_str}_angle_{angle_str}"
 
-    plt.figure()
-    plt.plot(disp_vals, stress_vals, marker='o', linestyle='-')
-    plt.xlabel(r"$\bar{u}$")
-    plt.ylabel(rf"$\sigma_{{{component}}}$" if component else r"$\sigma$")
-    plt.tight_layout()
-    plt.savefig(str(out_path), dpi=150)
-    plt.close()
-    print(f"Saved stress vs displacement plot: {out_path}")
+    fig, ax = plt.subplots(figsize=ts.figsize(WIDTH))
+    ax.plot(disp_vals, stress_vals, marker='o', linestyle='-')
+    ax.set_xlabel(r"$\bar{u}$")
+    ax.set_ylabel(rf"$\sigma_{{{component}}}$" if component else r"$\sigma$")
+    ts.save(fig, out_stem)
+    plt.close(fig)
     return True
 
 def visulize_whole_field(outdir,infile_parent,angle_str,chi_str,stress, component):
-    plt.figure()
-    plt.imshow(stress, origin='lower')
+    ny, nx = stress.shape
+    fig, ax = plt.subplots(figsize=ts.figsize(WIDTH, aspect=0.85 * ny / nx))
+    im = ax.imshow(stress, origin='lower')
     stress_label = rf"$\sigma_{{{component}}}$" if component else r"$\sigma$"
-    plt.colorbar(label=stress_label)
-    plt.xlabel(r"$x$")
-    plt.ylabel(r"$y$")
-    plt.show()
+    fig.colorbar(im, ax=ax, label=stress_label)
+    ax.set_xlabel(r"$x$")
+    ax.set_ylabel(r"$y$")
 
     outdir = Path(outdir) if outdir else infile_parent
-    outdir.mkdir(parents=True, exist_ok=True)
-
     comp_tag = f"stress{component}" if component else "stress"
-    out_name = f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_field.png"
-    out_path = outdir / out_name
-    plt.savefig(str(out_path), dpi=150)
-    print(f"Saved plot to: {out_path}")
+    ts.save(fig, outdir / f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_field")
+    plt.close(fig)
 
 def plot_stress_vs_x_fixed_y(x,stress,y_index,infile_parent,component,chi_str,angle_str, outdir):
-    plt.figure()
-    plt.plot(x,stress[y_index, :])
-    plt.xlabel(r"$x$")
-    plt.ylabel(rf"$\sigma_{{{component}}}$" if component else r"$\sigma$")
+    fig, ax = plt.subplots(figsize=ts.figsize(WIDTH))
+    ax.plot(x, stress[y_index, :])
+    ax.set_xlabel(r"$x$")
+    ax.set_ylabel(rf"$\sigma_{{{component}}}$" if component else r"$\sigma$")
     outdir = Path(outdir) if outdir else infile_parent
-    outdir.mkdir(parents=True, exist_ok=True)
-
     comp_tag = f"stress{component}" if component else "stress"
-    out_name = f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_x_fixed_y{y_index}.png"
-    out_path = outdir / out_name
-    plt.savefig(str(out_path), dpi=150)
-    print(f"Saved plot to: {out_path}")
+    ts.save(fig, outdir / f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_x_fixed_y{y_index}")
+    plt.close(fig)
 
 def plot_stress_vs_y_fixed_x(y,stress,x_index,infile_parent,component,chi_str,angle_str, outdir):
-    plt.figure()
-    plt.plot(y,stress[: ,x_index])
-    plt.xlabel(r"$y$")
-    plt.ylabel(rf"$\sigma_{{{component}}}$" if component else r"$\sigma$")
+    fig, ax = plt.subplots(figsize=ts.figsize(WIDTH))
+    ax.plot(y, stress[:, x_index])
+    ax.set_xlabel(r"$y$")
+    ax.set_ylabel(rf"$\sigma_{{{component}}}$" if component else r"$\sigma$")
     outdir = Path(outdir) if outdir else infile_parent
-    outdir.mkdir(parents=True, exist_ok=True)
-
     comp_tag = f"stress{component}" if component else "stress"
-    out_name = f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_y_fixed_x{x_index}.png"
-    out_path = outdir / out_name
-    plt.savefig(str(out_path), dpi=150)
-    print(f"Saved plot to: {out_path}")
+    ts.save(fig, outdir / f"{comp_tag}_chi_{chi_str}_angle_{angle_str}_y_fixed_x{x_index}")
+    plt.close(fig)
+
+
+WIDTH = 0.8  # fraction of the text width, overwritten by --width
 
 
 def main():
+    global WIDTH
     args = parse_args()
+    WIDTH = args.width
 
     # If the user provided stressfile + displacementfile, produce a stress-vs-displacement plot
     if args.stressfile and args.displacementfile:
@@ -475,8 +467,8 @@ def main():
     outdir = Path(args.outdir) if args.outdir else infile.parent
     outdir.mkdir(parents=True, exist_ok=True)
 
-    visulize_whole_field(outdir, infile.parent,angle_str,chi_str,stress_man,component)
-    #plot_stress_vs_x_fixed_y(x_values_man,stress_man,50,infile.parent,component,chi_str,angle_str, outdir)
+    visulize_whole_field(args.outdir, infile.parent,angle_str,chi_str,stress_man,component)
+    plot_stress_vs_x_fixed_y(x_values_man,stress_man,50,infile.parent,component,chi_str,angle_str, outdir)
     #plot_stress_vs_y_fixed_x(y_values_man,stress_man,50,infile.parent,component,chi_str,angle_str, outdir)
 
     if args.show:
